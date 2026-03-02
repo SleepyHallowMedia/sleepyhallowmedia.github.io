@@ -16,14 +16,14 @@
   /* Base palette (light) */
   --bg: #f6f8fc;
   --surface: #ffffff;
-  --surface-2: #f2f5fb;
+  --surface-2: #ff0000;
   --ink: #0e1a2a;
   --muted: #667792;
   --border: #dfe5ef;
 
   /* Brand & accents */
   --accent: #0f3e56;            /* primary */
-  --accent-ink: #e9f2f7;        /* text-on-accent (light chip) */
+  --accent-ink: #277298;        /* text-on-accent (light chip) */
   --accent-2: #d48c45;          /* warm secondary */
 
   /* Links */
