@@ -30,53 +30,77 @@
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script defer src="script.js?v=5.1"></script>
 
-  <!-- AdSense loader (added) -->
+  <!-- AdSense loader (only once on the page) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337"
           crossorigin="anonymous"></script>
 
-  <!-- Minimal styles to place left/right ad rails -->
+  <!-- Side-ads CSS (fixed rails that don't affect layout) -->
   <style>
-    /* Layout: ad rails + content */
-    .article-wrap {
-      display: grid;
-      grid-template-columns: 1fr min(740px, 100%) 1fr; /* left rail | content | right rail */
-      gap: 16px;
-      align-items: start;
+    :root{
+      /* The article content width is auto-synced at runtime; this is just a fallback */
+      --article-content-width: 740px;
+
+      /* Side-rail appearance/behavior */
+      --rail-width: 300px;           /* 300 fits 300x250/300x600 units */
+      --rail-gap: 24px;              /* distance from article edge */
+      --rails-top: 120px;            /* distance from top of viewport; raise/lower to avoid header overlap */
+      --rails-min-viewport: 1280px;  /* show side rails only above this viewport width */
+      --ad-min-height: 250px;        /* reserve space to reduce CLS pre-fill */
     }
-    .ad-rail {
-      position: sticky;
-      top: 16px; /* keep visible while scrolling */
-      height: max-content;
+
+    /* Fixed rails: do not occupy layout space => no content shift */
+    .ad-rail-fixed{
+      position: fixed;
+      top: var(--rails-top);
+      width: var(--rail-width);
+      z-index: 10;
+      display: none; /* hidden by default, enabled at wide viewports */
     }
-    .ad-rail .ad-slot {
+    .ad-rail-fixed .adsbygoogle{
       display: block;
       width: 100%;
-      min-height: 250px; /* prevents jumpy layout before fill */
+      min-height: var(--ad-min-height);
       background: transparent;
     }
-    /* Rail widths (tweak as needed) */
-    .ad-left, .ad-right {
-      width: 300px; /* typical sidebar width for 300x250/300x600 */
-      justify-self: center;
-    }
 
-    /* Keep existing article-body centered in the middle column */
-    .article-body {
-      max-width: 740px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Hide rails on smaller viewports */
-    @media (max-width: 1200px) {
-      .article-wrap {
-        grid-template-columns: minmax(0, 1fr);
+    /* Place rails relative to the centered article width from viewport center */
+    @media (min-width: var(--rails-min-viewport)){
+      .ad-rail-fixed{ display: block; }
+      .ad-rail-left{
+        left: calc(50% - (var(--article-content-width) / 2) - var(--rail-gap) - var(--rail-width));
       }
-      .ad-left, .ad-right {
-        display: none;
+      .ad-rail-right{
+        left: calc(50% + (var(--article-content-width) / 2) + var(--rail-gap));
       }
     }
   </style>
+
+  <!-- Sync the CSS var to the actual rendered article width so rails align perfectly -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      try{
+        const articleEl = document.querySelector('.article-body');
+        if(!articleEl) return;
+
+        const setWidthVar = () => {
+          const w = Math.round(articleEl.getBoundingClientRect().width);
+          if (w > 0) {
+            document.documentElement.style.setProperty('--article-content-width', w + 'px');
+          }
+        };
+
+        setWidthVar();
+        let rafId = null;
+        const onResize = () => {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(setWidthVar);
+        };
+        window.addEventListener('resize', onResize);
+      }catch(e){
+        // no-op; fallback value remains
+      }
+    });
+  </script>
 </head>
 <body data-page="article">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -136,38 +160,37 @@
   </section>
 
   <main class="wrap article-wrap" id="main" tabindex="-1">
-    <!-- LEFT AD RAIL -->
-    <aside class="ad-rail ad-left" aria-label="Advertisement left">
-      <!-- Example 300x600 / responsive -->
-      <ins class="adsbygoogle ad-slot"
+    <!-- LEFT SIDE AD (fixed; does not push content) -->
+    <aside class="ad-rail-fixed ad-rail-left" aria-label="Advertisement left">
+      <!-- Article View -->
+      <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-9198552366209337"
-           data-ad-slot="REPLACE_WITH_LEFT_SLOT_ID"
+           data-ad-slot="7504472229"
            data-ad-format="auto"
-           data-full-width-responsive="false"></ins>
+           data-full-width-responsive="true"></ins>
       <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
       </script>
     </aside>
 
-    <!-- ARTICLE CONTENT -->
+    <!-- RIGHT SIDE AD (fixed; does not push content) -->
+    <aside class="ad-rail-fixed ad-rail-right" aria-label="Advertisement right">
+      <!-- Article View -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9198552366209337"
+           data-ad-slot="7504472229"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </aside>
+
     <article id="article-content" class="article-body" aria-busy="true">
       <p class="muted">Loading article…</p>
     </article>
-
-    <!-- RIGHT AD RAIL -->
-    <aside class="ad-rail ad-right" aria-label="Advertisement right">
-      <!-- Example 300x250 / responsive -->
-      <ins class="adsbygoogle ad-slot"
-           style="display:block"
-           data-ad-client="ca-pub-9198552366209337"
-           data-ad-slot="REPLACE_WITH_RIGHT_SLOT_ID"
-           data-ad-format="auto"
-           data-full-width-responsive="false"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    </aside>
 
     <aside class="share-bar" aria-label="Share this article">
       <button class="share-btn" data-share="copy">Copy Link</button>
