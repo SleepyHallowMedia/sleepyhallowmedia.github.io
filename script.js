@@ -1,9 +1,10 @@
-/* Sleepy Hallow Media — App (v7.2.1 core)
-   One-file hotfix:
-   - All templates output real <a>/<img> (no raw URL text)
-   - Trending / category / tag chips use proper <a href>…</a>
+/* Sleepy Hallow Media — App (v7.2.2)
+   - Lead story is a real clickable card with thumbnail (like grid cards)
+   - All templates output real <a>/<img> (no raw URL strings)
    - No #latest-grid usage
-   - Defensive DOM guards
+   - Defensive DOM guards across the board
+   - Home: lead + top rail + trending + dynamic rows
+   - Newsletters list page + Article page
 */
 'use strict';
 
@@ -13,7 +14,7 @@ const NEWS_DIR = 'newsletters/';
 const DEFAULT_THUMB = 'thumbnails/placeholder.png';
 const TOP_RAIL_COUNT = 4;
 
-/* Dynamic topics pool */
+/* Dynamic topics pool used on home */
 const FEATURED_TOPICS = [
   { tag:'Politics', head:'Interested in politics?', sub:'Here are stories that will feed that hunger!' },
   { tag:'Local',    head:'What’s happening nearby?', sub:'Local stories, close to home.' },
@@ -37,7 +38,10 @@ function setCookie(name,value,days=365){
 function getStoredTheme(){
   const c=getCookie(THEME_COOKIE);
   if(c==='dark'||c==='light') return c;
-  try{ const s=localStorage.getItem(THEME_COOKIE); if(s==='dark'||s==='light') return s; }catch{}
+  try{
+    const s=localStorage.getItem(THEME_COOKIE);
+    if(s==='dark'||s==='light') return s;
+  }catch{}
   return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
 }
 function applyTheme(theme){
@@ -79,6 +83,17 @@ function escapeHtml(s){
     .replace(/'/g,'&#39;');
 }
 function escapeAttr(s){ return escapeHtml(String(s)); }
+
+/* Tiny helpers to guarantee real tags */
+function imgTag(src, alt='', cls=''){
+  const c = cls ? ` class="${escapeAttr(cls)}"` : '';
+  return `${escapeAttr(src)}`;
+}
+function aTag(href, inner, cls='', aria=''){
+  const c = cls ? ` class="${escapeAttr(cls)}"` : '';
+  const ar = aria ? ` ${aria}` : '';
+  return `${escapeAttr(href)}${inner}</a>`;
+}
 
 function sanitizeFilename(filename){
   if(!filename || typeof filename!=='string') return '';
@@ -207,10 +222,18 @@ function hookHoverPrefetch(){
 
 /* ---------- Image hints ---------- */
 function enhanceImages(){
-  document.querySelectorAll('.top-card img').forEach(img=>{
+  // Lead image
+  document.querySelectorAll('.lead-card img.lead-img').forEach(img=>{
+    img.loading='eager';       // change to 'lazy' if you prefer
+    img.decoding='async';
+    img.sizes='(max-width:880px) 92vw, 640px';
+  });
+  // Top-rail thumbs
+  document.querySelectorAll('.top-card img.top-thumb').forEach(img=>{
     img.loading='lazy'; img.decoding='async'; img.sizes='(max-width:980px) 92vw, 120px';
   });
-  document.querySelectorAll('.cards-grid img').forEach(img=>{
+  // Cards in topic rows / list page
+  document.querySelectorAll('.cards-grid img.card-img').forEach(img=>{
     img.loading='lazy'; img.decoding='async';
     img.sizes='(max-width:600px) 92vw, (max-width:1200px) 33vw, 260px';
   });
@@ -228,48 +251,62 @@ function ensureListRoles(){
 /* ============================
    Templates — REAL TAGS
    ============================ */
-function leadCardHTML(item){
+
+/* Build the lead story as a real <a> card (clickable + thumbnail) */
+function buildLeadNode(item){
   const { file, meta } = item;
+  const url    = `article.html?article=${encodeURIComponent(file)}`;
   const title  = meta.Title || file;
+  const imgSrc = resolveThumbPath(meta.Thumbnail);
   const cat    = (meta.Category || '').trim();
   const date   = formatDate(meta.Date);
   const author = meta.Author || 'Staff';
-  const img    = resolveThumbPath(meta.Thumbnail);
-  const url    = `article.html?article=${encodeURIComponent(file)}`;
   const dek    = meta.Subtitle ? `<p class="hero-dek">${escapeHtml(meta.Subtitle)}</p>` : '';
 
-  // Real elements: hidden lead-bg image + title link
-  return `
-    <div class="lead-media" style="display:none">
-      <img class="lead-bg" src="${escapeAttr(img)}" alt="" />
+  const a = document.createElement('a');
+  a.className = 'lead-card';
+  a.href = url;
+  a.setAttribute('aria-label', title);
+
+  a.innerHTML = `
+    ${imgTag(imgSrc, '', 'lead-img')}
+    <div class="lead-body">
+      ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
+      <h2 class="lead-title">${escapeHtml(title)}</h2>
+      <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
+      ${dek}
     </div>
-    ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-    <h2 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h2>
-    <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
-    ${dek}
   `;
+
+  // Mirror lead image to hero-right artwork if present
+  const art = document.getElementById('hero-art');
+  if (art && imgSrc) { art.src = imgSrc; }
+
+  return a;
 }
+
+/* Right rail card (thumb + title) */
 function topCardHTML(item){
   const { file, meta } = item;
   const title  = meta.Title || file;
-  const img    = resolveThumbPath(meta.Thumbnail);
+  const imgSrc = resolveThumbPath(meta.Thumbnail);
   const date   = formatDate(meta.Date);
   const author = meta.Author || 'Staff';
   const url    = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    <a class="top-thumb-wrap" href="${escapeAttr(url)}" aria-label="${escapeHtml(title)}">
-      <img class="top-thumb" src="${escapeAttr(img)}" alt="" />
-    </a>
+    ${aTag(url, imgTag(imgSrc, '', 'top-thumb'))}
     <div class="top-body">
-      <h3 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
+      <h3 class="top-title">${aTag(url, escapeHtml(title))}</h3>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
 }
+
+/* Grid card used in dynamic topic rows and newsletters list */
 function gridCard(item){
   const { file, meta } = item;
-  const img    = resolveThumbPath(meta.Thumbnail);
+  const imgSrc = resolveThumbPath(meta.Thumbnail);
   const title  = meta.Title || file;
   const date   = formatDate(meta.Date);
   const author = meta.Author || 'Staff';
@@ -284,7 +321,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    <img class="card-img" src="${escapeAttr(img)}" alt="" />
+    ${imgTag(imgSrc, '', 'card-img')}
     <div class="card-body">
       ${chip}${tags}
       <h3 class="card-title">${escapeHtml(title)}</h3>
@@ -317,17 +354,11 @@ async function renderHome(){
     return;
   }
 
-  // Lead (left)
+  // Lead (clickable card)
   if(leadEl){
-    leadEl.innerHTML = leadCardHTML(data[0]);
+    leadEl.innerHTML = '';
+    leadEl.appendChild(buildLeadNode(data[0]));
     leadEl.removeAttribute('aria-busy');
-
-    // Mirror lead image into hero art (if present)
-    try{
-      const hiddenImg=leadEl.querySelector('.lead-bg');
-      const art=document.getElementById('hero-art');
-      if(hiddenImg && art && hiddenImg.getAttribute('src')) art.src = hiddenImg.getAttribute('src');
-    }catch{}
   }
 
   // Top rail
@@ -342,7 +373,7 @@ async function renderHome(){
     }
   }
 
-  // Trending — proper anchors
+  // Trending (real anchors)
   if(trend){
     const counts=new Map();
     for(const it of data){
@@ -350,7 +381,7 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k])=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
+      ? topTags.map(([k])=> aTag(`newsletters.html?tag=${encodeURIComponent(k)}`, escapeHtml(k), 'trend-chip') ).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
@@ -363,13 +394,13 @@ async function renderHome(){
 /* ---------- Dynamic sections ---------- */
 function seededRand(seed){ let x=Math.sin(seed)*10000; return ()=>{ x=(x*9301+49297)%233280; return x/233280; }; }
 function chooseTopics(allItems){
-  const dayKey=Number(new Date().toISOString().slice(0,10).replace(/-/g,''));
-  const rand=seededRand(dayKey);
+  const dayKey = Number(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  const rand = seededRand(dayKey);
   const present=new Set();
   for(const it of allItems){ for(const t of (it.meta._tags||[])) present.add(t.toLowerCase()); }
   const pool=FEATURED_TOPICS.filter(t=>present.has(t.tag.toLowerCase()));
   if(pool.length===0) return [];
-  const count=Math.min(pool.length, (rand()>0.5 ? 3 : 2));
+  const count = Math.min(pool.length, (rand()>0.5 ? 3 : 2));
   const picked=[]; const used=new Set();
   while(picked.length<count && used.size<pool.length){
     const idx=Math.floor(rand()*pool.length);
@@ -433,14 +464,14 @@ async function renderListPage(){
 
   const data=await loadVisibleSorted();
 
-  // Category chips — real anchors
+  // Category chips
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML = cats.map(c=>`<a class="chip" href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML = cats.map(c=> aTag(`newsletters.html?category=${encodeURIComponent(c)}`, escapeHtml(c), 'chip') ).join('');
   }
 
-  // Tag cloud — real anchors with toggle behavior
+  // Tag cloud with toggle
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
@@ -452,7 +483,7 @@ async function renderListPage(){
       const current=(url.searchParams.get('tag')||'').split(',').map(s=>s.trim()).filter(Boolean).map(x=>x.toLowerCase());
       const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
       if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-      return `<a class="chip" href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
+      return aTag(url.pathname + url.search, escapeHtml(t), 'chip');
     }).join('') : '<span class="muted">No tags yet</span>';
   }
 
@@ -555,7 +586,7 @@ function renderArticle(container, filename, meta, body){
   if(tags.length && bylineWrap){
     const tagDiv=document.createElement('div');
     tagDiv.className='a-tags';
-    tagDiv.innerHTML = tags.map(t=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
+    tagDiv.innerHTML = tags.map(t=> aTag(`newsletters.html?tag=${encodeURIComponent(t)}`, escapeHtml(t), 'chip') ).join('');
     bylineWrap.appendChild(tagDiv);
   }
 
@@ -635,7 +666,7 @@ function initHeroParallax(){
 
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('script.js v7.2.1 (hotfix) loaded');
+  console.log('script.js v7.2.2 loaded');
   initTheme();
   initMobile();
   markCurrentNav();
@@ -646,4 +677,3 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initArticlePage();
   initHeroParallax();
 });
-``
