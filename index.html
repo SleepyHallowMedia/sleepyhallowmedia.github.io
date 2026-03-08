@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
-  <!-- Ads (load once per page) -->
+  <!-- Ads: load once per page -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
 
   <meta charset="utf-8" />
@@ -11,13 +11,13 @@
   <meta name="description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
 
   <!-- Canonical & Open Graph -->
-  <link rel="canonical" href="https://sleepyhallowmedia.github.io/" />
+  <link rel="canonical" href="https://woodstocker99.github.io/SleepyHallowMedia/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sleepy Hallow Media" />
   <meta property="og:title" content="Sleepy Hallow Media — Independent Reporting" />
   <meta property="og:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
   <meta property="og:image" content="assets/social-default.jpg" />
-  <meta property="og:url" content="https://sleepyhallowmedia.github.io/" />
+  <meta property="og:url" content="https://woodstocker99.github.io/SleepyHallowMedia/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Sleepy Hallow Media — Independent Reporting" />
   <meta name="twitter:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
@@ -27,13 +27,13 @@
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Styles & App -->
-  <link rel="stylesheet" href="styles.css?v=6.0" />
+  <link rel="stylesheet" href="styles.css?v=7.0" />
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script defer src="script.js?v=6.0"></script>
+  <script defer src="script.js?v=7.0"></script>
 </head>
 <body>
   <!-- Skip link -->
@@ -101,22 +101,28 @@
       <article id="lead-story" class="lead-card" role="article" aria-busy="true"></article>
 
       <div class="right-rail" role="list" id="right-rail">
-        <div id="top-stories" class="top-stories"></div>
+        <div id="top-stories" class="top-stories" role="list"></div>
       </div>
     </section>
 
     <!-- Latest + sidebar -->
     <section class="content-grid" aria-label="Latest and signup">
-
+      <div>
+        <div id="latest-grid" class="cards-grid" role="list" aria-busy="true"></div>
+      </div>
 
       <aside class="side-panel signup" aria-label="Newsletter signup">
         <h3 class="h-side">Never miss a premium story</h3>
         <p>Get the latest in your inbox. No spam.</p>
         <a class="btn" href="newsletters.html">Subscribe</a>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <ul id="sidebar-latest" class="side-list" role="list" aria-busy="true"></ul>
       </aside>
     </section>
 
-    <!-- About block (appears after latest) -->
+    <!-- About block -->
     <section id="about-block" class="about-block" aria-labelledby="about-heading">
       <h2 id="about-heading" class="h-section">About</h2>
       <p class="about-lede">
@@ -124,12 +130,12 @@
         we chase clarity, context, and a bit of wonder.
       </p>
       <p class="about-detail">
-        We publish local reporting, politics, culture, and opinion.
-        We keep pages fast, readable, and accessible. We also like a little mischief.
+        We publish local reporting, politics, culture, and opinion. We keep pages fast,
+        readable, and accessible. We also like a little mischief.
       </p>
     </section>
 
-    <!-- Dynamic topic sections (rotates per visit/day) -->
+    <!-- Dynamic topic sections (optional, populated by script) -->
     <section id="dynamic-sections" class="dynamic-sections" aria-label="Handpicked for you"></section>
   </main>
 

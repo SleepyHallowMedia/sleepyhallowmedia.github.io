@@ -9,8 +9,7 @@
 
   <title>Sleepy Hallow Media — All Newsletters</title>
   <meta name="description" content="Browse all Sleepy Hallow Media stories by category and tag." />
-
-  <link rel="canonical" href="https://sleepyhallowmedia.github.io/newsletters.html" />
+  <link rel="canonical" href="https://woodstocker99.github.io/SleepyHallowMedia/newsletters.html" />
 
   <!-- OG/Twitter -->
   <meta property="og:type" content="website" />
@@ -18,7 +17,7 @@
   <meta property="og:title" content="Sleepy Hallow Media — Newsletters" />
   <meta property="og:description" content="Browse all issues and stories." />
   <meta property="og:image" content="assets/social-default.jpg" />
-  <meta property="og:url" content="https://sleepyhallowmedia.github.io/newsletters.html" />
+  <meta property="og:url" content="https://woodstocker99.github.io/SleepyHallowMedia/newsletters.html" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Sleepy Hallow Media — Newsletters" />
   <meta name="twitter:description" content="Browse all issues and stories." />
@@ -28,12 +27,12 @@
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=6.0" />
+  <link rel="stylesheet" href="styles.css?v=7.0" />
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script defer src="script.js?v=6.0"></script>
+  <script defer src="script.js?v=7.0"></script>
 </head>
 <body data-page="list">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -60,10 +59,12 @@
         <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
+
       <nav class="primary-nav" aria-label="Primary">
         <a data-nav="home" href="index.html">Home</a>
         <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
       </nav>
+
       <div class="header-tools">
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
           <span class="theme-icon" aria-hidden="true">🌙</span>
@@ -90,6 +91,8 @@
       <div class="muted" style="margin-top:.6rem">Tags</div>
       <div id="tag-cloud" class="trend-tags" style="margin-top:.2rem;"></div>
     </div>
+
+    <div class="section-divider" aria-hidden="true"></div>
 
     <div id="news-list" class="cards-grid" role="list" aria-busy="true"></div>
   </main>

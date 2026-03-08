@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>Sleepy Hallow Media — Article</title>
 
   <!-- Canonical filled at runtime -->
@@ -12,8 +13,8 @@
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=6.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=7.0" />
 
   <!-- OG/Twitter defaults (script overwrites) -->
   <meta property="og:type" content="article" />
@@ -27,9 +28,10 @@
   <meta name="twitter:description" id="tw-description" content="" />
   <meta name="twitter:image" id="tw-image" content="assets/social-default.jpg" />
 
+  <!-- Libraries & App -->
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script defer src="script.js?v=6.0"></script>
+  <script defer src="script.js?v=7.0"></script>
 
   <!-- AdSense loader (once) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
@@ -91,10 +93,12 @@
         <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
+
       <nav class="primary-nav" aria-label="Primary">
         <a data-nav="home" href="index.html">Home</a>
         <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
       </nav>
+
       <div class="header-tools">
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
           <span class="theme-icon" aria-hidden="true">🌙</span>
@@ -102,6 +106,7 @@
         <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
       </div>
     </div>
+
     <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile">
       <a data-nav="home" href="index.html">Home</a>
       <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
