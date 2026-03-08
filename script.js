@@ -1,8 +1,8 @@
-/* Sleepy Hallow Media — App (v7.2.2)
+/* Sleepy Hallow Media — App (v7.3.0)
    - Lead story is a real clickable card with thumbnail (like grid cards)
-   - All templates output real <a>/<img> (no raw URL strings)
+   - All templates output real <a>/<img> (no raw URL text)
    - No #latest-grid usage
-   - Defensive DOM guards across the board
+   - Defensive DOM guards
    - Home: lead + top rail + trending + dynamic rows
    - Newsletters list page + Article page
 */
@@ -14,7 +14,7 @@ const NEWS_DIR = 'newsletters/';
 const DEFAULT_THUMB = 'thumbnails/placeholder.png';
 const TOP_RAIL_COUNT = 4;
 
-/* Dynamic topics pool used on home */
+/* Topic pool for dynamic sections */
 const FEATURED_TOPICS = [
   { tag:'Politics', head:'Interested in politics?', sub:'Here are stories that will feed that hunger!' },
   { tag:'Local',    head:'What’s happening nearby?', sub:'Local stories, close to home.' },
@@ -27,31 +27,27 @@ const FEATURED_TOPICS = [
 /* ---------- Theme ---------- */
 const THEME_COOKIE = 'theme';
 function getCookie(name){
-  const esc=String(name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const m=document.cookie.match(new RegExp('(?:^|; )'+esc+'=([^;]*)'));
-  return m?decodeURIComponent(m[1]):'';
+  const esc = String(name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const m = document.cookie.match(new RegExp('(?:^|; )'+esc+'=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : '';
 }
-function setCookie(name,value,days=365){
+function setCookie(name,val,days=365){
   const maxAge=days*24*60*60;
-  document.cookie=`${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(val)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
 }
 function getStoredTheme(){
   const c=getCookie(THEME_COOKIE);
   if(c==='dark'||c==='light') return c;
-  try{
-    const s=localStorage.getItem(THEME_COOKIE);
-    if(s==='dark'||s==='light') return s;
-  }catch{}
-  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  try{ const s=localStorage.getItem(THEME_COOKIE); if(s==='dark'||s==='light') return s; }catch{}
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 }
-function applyTheme(theme){
-  document.documentElement.setAttribute('data-theme', theme);
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
   const btn=document.getElementById('theme-toggle');
   if(btn){
-    btn.setAttribute('aria-pressed', theme==='dark'?'true':'false');
-    const icon=btn.querySelector('.theme-icon');
-    if(icon) icon.textContent = theme==='dark' ? '☀️' : '🌙';
-    btn.setAttribute('aria-label', theme==='dark'?'Switch to light mode':'Switch to dark mode');
+    btn.setAttribute('aria-pressed', t==='dark'?'true':'false');
+    const icon=btn.querySelector('.theme-icon'); if(icon) icon.textContent = t==='dark'?'☀️':'🌙';
+    btn.setAttribute('aria-label', t==='dark' ? 'Switch to light mode' : 'Switch to dark mode');
   }
 }
 function initTheme(){
@@ -82,17 +78,21 @@ function escapeHtml(s){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
-function escapeAttr(s){ return escapeHtml(String(s)); }
+function escAttr(s){ return escapeHtml(String(s)); }
 
-/* Tiny helpers to guarantee real tags */
+/* Real tag helpers (no raw text) */
 function imgTag(src, alt='', cls=''){
-  const c = cls ? ` class="${escapeAttr(cls)}"` : '';
-  return `${escapeAttr(src)}`;
+  const c = cls ? ` class="${escAttr(cls)}"` : '';
+  const a = alt ? ` alt="${escAttr(alt)}"` : ` alt=""`;
+  return `<img src="${escAttr(src)}"${a}${c}>`;
 }
-function aTag(href, inner, cls='', aria=''){
-  const c = cls ? ` class="${escapeAttr(cls)}"` : '';
-  const ar = aria ? ` ${aria}` : '';
-  return `${escapeAttr(href)}${inner}</a>`;
+function aOpen(href, cls='', extra=''){
+  const c = cls ? ` class="${escAttr(cls)}"` : '';
+  const x = extra ? ` ${extra}` : '';
+  return `<a href="${escAttr(href)}"${c}${x}>`;
+}
+function aTag(href, inner, cls='', extra=''){
+  return `${aOpen(href, cls, extra)}${inner}</a>`;
 }
 
 function sanitizeFilename(filename){
@@ -104,7 +104,7 @@ function sanitizeFilename(filename){
 }
 function parseFrontmatter(text){
   let src=String(text??'').replace(/\r/g,'').replace(/^\uFEFF/,'').replace(/^\s+/, '');
-  if(!src.startsWith('---\n') && src!=='---'){ return {meta:{}, body:src.trim()}; }
+  if(!src.startsWith('---\n')&&src!=='---'){ return {meta:{}, body:src.trim()}; }
   const lines=src.split('\n'); const meta={}; let i=1;
   for(;i<lines.length;i++){
     const line=lines[i].trim(); if(line==='---'){ i++; break; }
@@ -121,16 +121,12 @@ async function loadManifest(){
     if(!res.ok) throw new Error('manifest not found');
     const data=await res.json();
     return Array.isArray(data) ? data.map(sanitizeFilename).filter(Boolean) : [];
-  }catch(e){
-    console.warn('Manifest load error:', e);
-    return [];
-  }
+  }catch(e){ console.warn('Manifest load error:', e); return []; }
 }
 async function loadNewsletter(filename){
-  const f=sanitizeFilename(filename); if(!f) throw new Error('invalid filename');
+  const f=sanitizeFilename(filename); if(!f) throw new Error('bad file');
   const path=f.startsWith('newsletters/')?f:`${NEWS_DIR}${f}`;
-  const res=await fetch(path,{cache:'no-store'});
-  if(!res.ok) throw new Error('failed to fetch '+path);
+  const res=await fetch(path,{cache:'no-store'}); if(!res.ok) throw new Error('fetch failed '+path);
   const text=await res.text();
   return parseFrontmatter(text);
 }
@@ -187,9 +183,8 @@ async function loadVisibleSorted(){
   const visible=items.filter(r=>!isTruthy(r.meta.Hidden));
   visible.sort((a,b)=>{
     const ad=a.meta._dateObj, bd=b.meta._dateObj;
-    const aOk=ad && !Number.isNaN(ad.getTime());
-    const bOk=bd && !Number.isNaN(bd.getTime());
-    if(aOk && bOk) return bd - ad;
+    const aOk=ad&&!Number.isNaN(ad.getTime()), bOk=bd&&!Number.isNaN(bd.getTime());
+    if(aOk&&bOk) return bd-ad;
     if(aOk) return -1;
     if(bOk) return 1;
     return b.file.localeCompare(a.file);
@@ -210,29 +205,22 @@ async function primeArticle(file){
 function hookHoverPrefetch(){
   document.addEventListener('mouseover', e=>{
     const a=e.target.closest('a[href*="article.html?"]'); if(!a) return;
-    const u=new URL(a.href, location.href);
-    primeArticle(u.searchParams.get('article'));
+    const u=new URL(a.href, location.href); primeArticle(u.searchParams.get('article'));
   }, {passive:true});
   document.addEventListener('focusin', e=>{
     const a=e.target.closest('a[href*="article.html?"]'); if(!a) return;
-    const u=new URL(a.href, location.href);
-    primeArticle(u.searchParams.get('article'));
+    const u=new URL(a.href, location.href); primeArticle(u.searchParams.get('article'));
   });
 }
 
 /* ---------- Image hints ---------- */
 function enhanceImages(){
-  // Lead image
   document.querySelectorAll('.lead-card img.lead-img').forEach(img=>{
-    img.loading='eager';       // change to 'lazy' if you prefer
-    img.decoding='async';
-    img.sizes='(max-width:880px) 92vw, 640px';
+    img.loading='eager'; img.decoding='async'; img.sizes='(max-width:880px) 92vw, 640px';
   });
-  // Top-rail thumbs
   document.querySelectorAll('.top-card img.top-thumb').forEach(img=>{
     img.loading='lazy'; img.decoding='async'; img.sizes='(max-width:980px) 92vw, 120px';
   });
-  // Cards in topic rows / list page
   document.querySelectorAll('.cards-grid img.card-img').forEach(img=>{
     img.loading='lazy'; img.decoding='async';
     img.sizes='(max-width:600px) 92vw, (max-width:1200px) 33vw, 260px';
@@ -252,7 +240,7 @@ function ensureListRoles(){
    Templates — REAL TAGS
    ============================ */
 
-/* Build the lead story as a real <a> card (clickable + thumbnail) */
+/* Lead: clickable card + thumbnail */
 function buildLeadNode(item){
   const { file, meta } = item;
   const url    = `article.html?article=${encodeURIComponent(file)}`;
@@ -267,7 +255,6 @@ function buildLeadNode(item){
   a.className = 'lead-card';
   a.href = url;
   a.setAttribute('aria-label', title);
-
   a.innerHTML = `
     ${imgTag(imgSrc, '', 'lead-img')}
     <div class="lead-body">
@@ -278,14 +265,14 @@ function buildLeadNode(item){
     </div>
   `;
 
-  // Mirror lead image to hero-right artwork if present
-  const art = document.getElementById('hero-art');
-  if (art && imgSrc) { art.src = imgSrc; }
+  // Mirror to hero-right artwork if present
+  const art=document.getElementById('hero-art');
+  if(art && imgSrc){ art.src = imgSrc; }
 
   return a;
 }
 
-/* Right rail card (thumb + title) */
+/* Top rail: thumb + title */
 function topCardHTML(item){
   const { file, meta } = item;
   const title  = meta.Title || file;
@@ -303,7 +290,7 @@ function topCardHTML(item){
   `;
 }
 
-/* Grid card used in dynamic topic rows and newsletters list */
+/* Grid card: used in dynamic rows + list page */
 function gridCard(item){
   const { file, meta } = item;
   const imgSrc = resolveThumbPath(meta.Thumbnail);
@@ -354,7 +341,7 @@ async function renderHome(){
     return;
   }
 
-  // Lead (clickable card)
+  // Lead
   if(leadEl){
     leadEl.innerHTML = '';
     leadEl.appendChild(buildLeadNode(data[0]));
@@ -381,7 +368,7 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k])=> aTag(`newsletters.html?tag=${encodeURIComponent(k)}`, escapeHtml(k), 'trend-chip') ).join('')
+      ? topTags.map(([k])=> aTag(`newsletters.html?tag=${encodeURIComponent(k)}`, escapeHtml(k), 'chip') ).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
@@ -643,7 +630,7 @@ async function initArticlePage(){
   }
 }
 
-/* ---------- Small extras (safe) ---------- */
+/* ---------- Small extras (optional) ---------- */
 function initTicker(){
   const t=document.getElementById('edition-time'); if(!t) return;
   const fmt=d=>d.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -666,7 +653,7 @@ function initHeroParallax(){
 
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('script.js v7.2.2 loaded');
+  console.log('script.js v7.3.0 loaded');
   initTheme();
   initMobile();
   markCurrentNav();
@@ -677,3 +664,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initArticlePage();
   initHeroParallax();
 });
+``
