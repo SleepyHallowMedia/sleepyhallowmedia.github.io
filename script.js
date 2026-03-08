@@ -15,7 +15,7 @@ const SIDEBAR_LATEST_LIMIT = 8;
 /* ---------- Theme ---------- */
 const THEME_COOKIE = 'theme';
 function getCookie(name){
-  const escaped = String(name).replace(/[.*+?^${}()|[\]\]/g, '\$&');
+  const escaped = String(name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const m = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
   return m ? decodeURIComponent(m[1]) : '';
 }
@@ -64,13 +64,13 @@ function escapeHtml(str){
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
+    .replace(/\"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
-function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'\`'); }
+function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'\\`'); }
 function sanitizeFilename(filename){
   if(!filename || typeof filename!=='string') return '';
-  let f = filename.replace(/\/g,'/').trim();
+  let f = filename.replace(/\\/g,'/').trim();
   if(f.startsWith('/')) f=f.slice(1);
   if(f.includes('..') || f.startsWith('http:') || f.startsWith('https:')) return '';
   return f;
@@ -86,13 +86,11 @@ function formatDate(input){
   return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 }
 function parseFrontmatter(text){
-  const src=String(text??'').replace(//g,'').replace(/^﻿/, '').replace(/^\s+/, '');
-  if(!src.startsWith('---
-') && src!=='---'){
+  const src=String(text??'').replace(/\r/g,'').replace(/^\uFEFF/, '').replace(/^\s+/, '');
+  if(!src.startsWith('---\n') && src!=='---'){
     return {meta:{}, body:src.trim()};
   }
-  const lines=src.split('
-');
+  const lines=src.split('\n');
   const meta={};
   let i=1;
   for(; i<lines.length; i++){
@@ -102,8 +100,7 @@ function parseFrontmatter(text){
     const m=line.match(/^(.*?):\s*(.*)$/);
     if(m) meta[m[1].trim()]=m[2].trim();
   }
-  const body=lines.slice(i).join('
-').trim();
+  const body=lines.slice(i).join('\n').trim();
   return {meta, body};
 }
 
@@ -210,12 +207,12 @@ function leadCardHTML(item){
   const img = resolveThumbPath(meta.Thumbnail);
   const url = articleUrl(file);
   return `
-    <a class="card-overlay" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}"></a>
-    <img class="lead-bg" src="${escapeAttr(img)}" alt="" />
+    ${escapeAttr(url)}</a>
+    ${escapeAttr(img)}
     <div class="cover-masthead" aria-hidden="true"><span class="cover-vertical">HALLOW</span></div>
     <div class="lead-body">
       ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-      <h3 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
+      <h3 class="lead-title">${escapeAttr(url)}${escapeHtml(title)}</a></h3>
       <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
       <span class="cover-sticker" title="Premium Story">No. ${new Date().getFullYear().toString().slice(-2)}</span>
     </div>`;
@@ -229,11 +226,11 @@ function topCardHTML(item){
   const author = meta.Author || 'Staff';
   const url = articleUrl(file);
   return `
-    <a class="top-media" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}">
-      <img class="top-thumb" src="${escapeAttr(img)}" alt="" loading="lazy" decoding="async" />
+    ${escapeAttr(url)}
+      ${escapeAttr(img)}
     </a>
     <div class="top-body">
-      <h4 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h4>
+      <h4 class="top-title">${escapeAttr(url)}${escapeHtml(title)}</a></h4>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>`;
 }
@@ -254,7 +251,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    <img class="card-img" src="${escapeAttr(img)}" alt="" />
+    ${escapeAttr(img)}
     <div class="card-body">
       <div>${chip}${tags}</div>
       <h4 class="card-title">${escapeHtml(title)}</h4>
@@ -303,12 +300,8 @@ async function renderHome(){
         </div>`;
       leadEl.removeAttribute('aria-busy');
     }
-    if(topEl){ topEl.innerHTML = `
-No top stories available.
-`; }
-    if(latest){ latest.innerHTML = `
-No latest stories to show.
-`; latest.removeAttribute('aria-busy'); }
+    if(topEl){ topEl.innerHTML = `\nNo top stories available.\n`; }
+    if(latest){ latest.innerHTML = `\nNo latest stories to show.\n`; latest.removeAttribute('aria-busy'); }
     if(sList){ sList.innerHTML = ``; sList.removeAttribute('aria-busy'); }
     if(trend){ trend.innerHTML = `No trending tags yet`; }
     return;
@@ -354,7 +347,7 @@ No latest stories to show.
       const date=formatDate(item.meta.Date);
       const url = articleUrl(item.file);
       const title = item.meta.Title || item.file;
-      li.innerHTML = `<a href="${escapeAttr(url)}">${escapeHtml(title)}</a><div class="top-meta">${escapeHtml(date)}</div>`;
+      li.innerHTML = `${escapeAttr(url)}${escapeHtml(title)}</a><div class="top-meta">${escapeHtml(date)}</div>`;
       sList.appendChild(li);
     }
     sList.removeAttribute('aria-busy');
@@ -365,7 +358,7 @@ No latest stories to show.
     const counts=new Map();
     for(const it of data){ for(const t of (it.meta._tags||[])){ const key=t.trim(); if(!key) continue; counts.set(key,(counts.get(key)||0)+1); } }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
-    trend.innerHTML = topTags.length ? topTags.map(([k])=>`<a href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('') : `No trending tags yet`;
+    trend.innerHTML = topTags.length ? topTags.map(([k])=>`newsletters.html?tag=${encodeURIComponent(k)}${escapeHtml(k)}</a>`).join('') : `No trending tags yet`;
   }
 
   enhanceImages();
@@ -389,7 +382,7 @@ async function renderListPage(){
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML=cats.map(c=>`<a href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML=cats.map(c=>`newsletters.html?category=${encodeURIComponent(c)}${escapeHtml(c)}</a>`).join('');
   }
 
   // Tag cloud (toggle anchors)
@@ -404,7 +397,7 @@ async function renderListPage(){
       const isOn=current.includes(t.toLowerCase());
       const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
       if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-      return `<a href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
+      return `${escapeAttr(url.pathname + url.search)}${escapeHtml(t)}</a>`;
     }).join('') : 'No tags yet';
   }
 
@@ -419,7 +412,7 @@ async function renderListPage(){
 
   // Render
   container.innerHTML='';
-  if(!filtered.length){ container.innerHTML=`<div class="muted">No items found${q?` for “${escapeHtml(q)}”`:''}${activeCat?` in ${escapeHtml(activeCat)}':''}${activeTags.length?` with tags: ${escapeHtml(activeTags.join(', '))}`:''}.</div>`; container.removeAttribute('aria-busy'); return; }
+  if(!filtered.length){ container.innerHTML=`<div class="muted">No items found${q?` for “${escapeHtml(q)}”`:''}${activeCat?` in ${escapeHtml(activeCat)}`:''}${activeTags.length?` with tags: ${escapeHtml(activeTags.join(', '))}`:''}.</div>`; container.removeAttribute('aria-busy'); return; }
   for(const item of filtered){ container.appendChild(gridCard(item)); }
   container.removeAttribute('aria-busy');
 
@@ -476,7 +469,7 @@ function renderArticle(container, filename, meta, body){
   const rt=document.getElementById('article-reading-time'); if(rt) rt.textContent=` • ${reading}`;
   const tags=(meta.Tags?splitTags(meta.Tags):[]);
   const bylineWrap=document.querySelector('.a-hero .a-hero-inner');
-  if(tags.length && bylineWrap){ const tagDiv=document.createElement('div'); tagDiv.className='a-tags'; tagDiv.innerHTML = tags.map(t=>`<a href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join(''); bylineWrap.appendChild(tagDiv); }
+  if(tags.length && bylineWrap){ const tagDiv=document.createElement('div'); tagDiv.className='a-tags'; tagDiv.innerHTML = tags.map(t=>`newsletters.html?tag=${encodeURIComponent(t)}${escapeHtml(t)}</a>`).join(''); bylineWrap.appendChild(tagDiv); }
   const bodyHtml = renderMarkdownSafe(body);
   const date=formatDate(meta.Date); const author=meta.Author||'Staff'; const metaLine=`${date}${date?' • ':''}${author}`;
   container.innerHTML = `
@@ -518,9 +511,7 @@ function renderMarkdownSafe(text){
     const raw=window.marked.parse(String(text??''));
     return window.DOMPurify.sanitize(raw,{ALLOWED_ATTR:['href','src','alt','title','class']});
   }
-  return String(text??'').split(/
-\s*
-/).map(p=>`<p>${escapeHtml(p.trim())}</p>`).join('');
+  return String(text??'').split(/\n\s*\n/).map(p=>`<p>${escapeHtml(p.trim())}</p>`).join('');
 }
 
 /* ---------- Micro-motion for lead (respect reduced motion) ---------- */
