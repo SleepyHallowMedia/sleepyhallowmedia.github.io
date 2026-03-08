@@ -1,8 +1,8 @@
-/* Sleepy Hallow Media — App (v6.1.5)
-   Warm, whimsical-but-radical UX. Dynamic topic sections. Sticky share.
+/* Sleepy Hallow Media — App (v6.1.7)
+   Warm, whimsical‑but‑radical UX. Dynamic topic sections. Sticky share.
    Sleek Newsletters grid with compact mode for small result sets.
-   FIX: Output real <a> and <img> elements everywhere (prevents raw URLs/text),
-        which also removes the “stray article” on the homepage. */
+   FIX: All templates now output proper <a> and <img> elements (no raw URL text),
+        which also eliminates the “stray article” on the homepage. */
 
 'use strict';
 
@@ -543,7 +543,7 @@ async function renderListPage(){
     chipWrap.innerHTML=cats.map(c=>`newsletters.html?category=${encodeURIComponent(c)}${escapeHtml(c)}</a>`).join('');
   }
 
-  // Tag cloud (toggle behavior) (real anchors)
+  // Tag cloud (toggle links) (real anchors)
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
@@ -600,7 +600,7 @@ async function renderListPage(){
     container.appendChild(gridCard(item));
   }
 
-  // Toggle compact mode for 1–3 results (prevents blown-up cards)
+  // Toggle compact mode for 1–3 results (prevents blown‑up cards)
   setCompactGrid(container, filtered.length);
 
   container.removeAttribute('aria-busy');
