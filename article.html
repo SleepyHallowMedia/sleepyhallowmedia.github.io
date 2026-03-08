@@ -30,41 +30,33 @@
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script defer src="script.js?v=5.1"></script>
 
-  <!-- AdSense loader (KEEP ONLY ONE) -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337"
-          crossorigin="anonymous"></script>
+  <!-- AdSense loader (add ONCE, async) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
 
-  <!-- Side-ads CSS (fixed rails that don't affect layout) -->
+  <!-- Side-ads CSS (fixed rails that do not affect layout) -->
   <style>
     :root{
-      /* Fallback; will be overwritten at runtime with the real article width */
+      /* Fallback; a script below will set this to the actual article width at runtime */
       --article-content-width: 740px;
 
-      /* Tweakables */
-      --rail-width: 300px;          /* typical 300x250/300x600 width */
-      --rail-gap: 24px;             /* space from article edge */
-      --rails-top: 120px;           /* keep clear of your header */
-      --rails-min-viewport: 1280px; /* show rails only above this viewport width */
-      --ad-min-height: 250px;       /* reserve space to reduce CLS */
+      /* Tweak these to taste */
+      --rail-width: 120px;           /* matches your 120x728 skyscraper width */
+      --rail-gap: 24px;              /* space between article edge and ad rail */
+      --rails-top: 120px;            /* offset from top; avoid header overlap */
+      --rails-min-viewport: 1280px;  /* show side rails only above this width */
       --z-rails: 10;
     }
 
-    /* Fixed rails: outside normal flow -> never push content */
+    /* Fixed rails: out of normal flow -> they never push content */
     .ad-rail-fixed{
       position: fixed;
       top: var(--rails-top);
       width: var(--rail-width);
       z-index: var(--z-rails);
-      display: none; /* hidden by default; enabled on wide screens */
-    }
-    .ad-rail-fixed .adsbygoogle{
-      display: block;
-      width: 100%;
-      min-height: var(--ad-min-height);
-      background: transparent;
+      display: none; /* hidden by default; enabled at wide viewports */
     }
 
-    /* Place rails relative to the centered article area */
+    /* Place rails relative to the centered article width */
     @media (min-width: var(--rails-min-viewport)){
       .ad-rail-fixed{ display:block; }
       .ad-rail-left{
@@ -75,12 +67,11 @@
       }
     }
 
-    /* Your original article-body already centers itself; keep it */
-    /* This line reflects your original; if styles.css sets it, this is redundant but harmless. */
+    /* Ensure your article stays centered (redundant if already in styles.css, harmless otherwise) */
     .article-body { max-width: 740px; margin: 0 auto; width: 100%; }
   </style>
 
-  <!-- Sync CSS var to ACTUAL rendered article width for pixel-perfect alignment -->
+  <!-- Sync CSS var to the ACTUAL rendered article width so rails align flush -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const el = document.querySelector('.article-body');
@@ -164,11 +155,9 @@
     <aside class="ad-rail-fixed ad-rail-left" aria-label="Advertisement left">
       <!-- Article View -->
       <ins class="adsbygoogle"
-           style="display:block"
+           style="display:inline-block;width:120px;height:728px"
            data-ad-client="ca-pub-9198552366209337"
-           data-ad-slot="7504472229"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-ad-slot="7504472229"></ins>
       <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
       </script>
@@ -178,11 +167,9 @@
     <aside class="ad-rail-fixed ad-rail-right" aria-label="Advertisement right">
       <!-- Article View -->
       <ins class="adsbygoogle"
-           style="display:block"
+           style="display:inline-block;width:120px;height:728px"
            data-ad-client="ca-pub-9198552366209337"
-           data-ad-slot="7504472229"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-ad-slot="7504472229"></ins>
       <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
       </script>
