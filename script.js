@@ -1,9 +1,8 @@
-/* Sleepy Hallow Media — App (v6.1.8)
+/* Sleepy Hallow Media — App (v6.1.9)
    Warm, whimsical‑but‑radical UX. Dynamic topic sections. Sticky share.
    Sleek Newsletters grid with compact mode for small result sets.
 
-   CRITICAL FIX:
-   All templates below output REAL <a> and <img> elements (no raw URL text),
+   CRITICAL: All templates now output REAL <a> and <img> elements (no raw URL text),
    which also eliminates the “stray article” block on the homepage.
 */
 
@@ -102,7 +101,7 @@ function parseFrontmatter(text){
     if(line==='---'){ i++; break; }
     if(!line) continue;
     const m=line.match(/^([^:]+)\s*:\s*(.*)$/);
-    if(m) meta[m[1].trim()]=m[2].trim();
+    if(m) meta[m[1].trim()] = m[2].trim();
   }
   const body=lines.slice(i).join('\n').trim();
   return {meta, body};
@@ -298,8 +297,11 @@ function ensureListRoles(){
   if(sideList && !sideList.getAttribute('role')) sideList.setAttribute('role','list');
 }
 
-/* ---------- Card builders (REAL TAGS) ---------- */
-/* Lead/hero card: background image + overlay link + title link */
+/* ============================
+   Card builders (REAL TAGS)
+   ============================ */
+
+/* Lead/hero card: overlay link + background image + title link */
 function leadCardHTML(item){
   const { file, meta } = item;
   const title = meta.Title || file;
@@ -310,17 +312,17 @@ function leadCardHTML(item){
   const url = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    <a class="card-overlay" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}"></a>
-    <img class="lead-bg" src="${escapeAttr(img)}" alt="">
+    ${escapeAttr(url)}</a>
+    ${escapeAttr(img)}
     <div class="lead-body">
       ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-      <h2 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h2>
+      <h2 class="lead-title">${escapeAttr(url)}${escapeHtml(title)}</a></h2>
       <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
 }
 
-/* Right-rail “top” card (thumb + title) */
+/* Right‑rail “top” card (thumb + title) */
 function topCardHTML(item){
   const { file, meta } = item;
   const title = meta.Title || file;
@@ -330,17 +332,15 @@ function topCardHTML(item){
   const url = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    <a class="top-thumb-link" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}">
-      <img class="top-thumb" src="${escapeAttr(img)}" alt="">
-    </a>
+    ${escapeAttr(img)}
     <div class="top-body">
-      <h3 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
+      <h3 class="top-title">${escapeAttr(url)}${escapeHtml(title)}</a></h3>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
 }
 
-/* Grid card used in Latest and topic sections */
+/* Grid card used in Latest and topic sections (entire card is a link) */
 function gridCard(item){
   const { file, meta } = item;
   const img = resolveThumbPath(meta.Thumbnail);
@@ -358,7 +358,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    <img class="card-img" src="${escapeAttr(img)}" alt="">
+    ${escapeAttr(img)}
     <div class="card-body">
       ${chip}${tags}
       <h3 class="card-title">${escapeHtml(title)}</h3>
@@ -370,11 +370,11 @@ function gridCard(item){
 
 /* ---------- Homepage render ---------- */
 async function renderHome(){
-  const leadEl=document.getElementById('lead-story');
-  const topEl=document.getElementById('top-stories');
-  const latest=document.getElementById('latest-grid');
-  const sList=document.getElementById('sidebar-latest');
-  const trend=document.getElementById('trend-topics');
+  const leadEl  = document.getElementById('lead-story');
+  const topEl   = document.getElementById('top-stories');
+  const latest  = document.getElementById('latest-grid');
+  const sList   = document.getElementById('sidebar-latest');
+  const trend   = document.getElementById('trend-topics');
 
   if(!leadEl && !topEl && !latest && !sList && !trend) return;
 
@@ -426,7 +426,7 @@ async function renderHome(){
     latest.removeAttribute('aria-busy');
   }
 
-  // Sidebar latest list (anchors)
+  // Sidebar latest list
   if(sList){
     sList.innerHTML='';
     for(const item of data.slice(5, 5 + SIDEBAR_LATEST_LIMIT)){
@@ -435,14 +435,14 @@ async function renderHome(){
       const date=formatDate(item.meta.Date);
       const url = `article.html?article=${encodeURIComponent(item.file)}`;
       const title = item.meta.Title || item.file;
-      li.innerHTML = `<a href="${escapeAttr(url)}">${escapeHtml(title)}</a>
+      li.innerHTML = `${escapeAttr(url)}${escapeHtml(title)}</a>
       <div class="muted" style="font-size:.85rem">${escapeHtml(date)}</div>`;
       sList.appendChild(li);
     }
     sList.removeAttribute('aria-busy');
   }
 
-  // Trending tags (real anchors)
+  // Trending tags — REAL anchors
   if(trend){
     const counts=new Map();
     for(const it of data){
@@ -453,7 +453,7 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k])=>`<a href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
+      ? topTags.map(([k])=>`newsletters.html?tag=${encodeURIComponent(k)}${escapeHtml(k)}</a>`).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
@@ -544,14 +544,14 @@ async function renderListPage(){
 
   const data=await loadVisibleSorted();
 
-  // Category chips (real anchors)
+  // Category chips — REAL anchors
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML=cats.map(c=>`<a href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML=cats.map(c=>`newsletters.html?category=${encodeURIComponent(c)}${escapeHtml(c)}</a>`).join('');
   }
 
-  // Tag cloud (toggle links) (real anchors)
+  // Tag cloud (toggle) — REAL anchors
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
@@ -569,7 +569,7 @@ async function renderListPage(){
           const current=(url.searchParams.get('tag')||'').split(',').map(s=>s.trim()).filter(Boolean).map(x=>x.toLowerCase());
           const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
           if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-          return `<a href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
+          return `${escapeAttr(url.pathname + url.search)}${escapeHtml(t)}</a>`;
         }).join('')
       : '<span class="muted">No tags yet</span>';
   }
@@ -697,7 +697,7 @@ function renderArticle(container, filename, meta, body){
   if(tags.length && bylineWrap){
     const tagDiv=document.createElement('div');
     tagDiv.className='a-tags';
-    tagDiv.innerHTML = tags.map(t=>`<a href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
+    tagDiv.innerHTML = tags.map(t=>`newsletters.html?tag=${encodeURIComponent(t)}${escapeHtml(t)}</a>`).join('');
     bylineWrap.appendChild(tagDiv);
   }
 
