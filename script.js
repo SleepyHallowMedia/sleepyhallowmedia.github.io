@@ -1,9 +1,9 @@
-/* Sleepy Hallow Media — App (v7.2 core)
+/* Sleepy Hallow Media — App (v7.2.1 core)
+   One-file hotfix:
+   - All templates output real <a>/<img> (no raw URL text)
+   - Trending / category / tag chips use proper <a href>…</a>
    - No #latest-grid usage
-   - Templates use real <a>/<img> (no raw text)
-   - Defensive DOM guards (no errors if elements are absent)
-   - Home: lead + top rail + trending + dynamic rows
-   - Newsletters list page + Article page
+   - Defensive DOM guards
 */
 'use strict';
 
@@ -13,7 +13,7 @@ const NEWS_DIR = 'newsletters/';
 const DEFAULT_THUMB = 'thumbnails/placeholder.png';
 const TOP_RAIL_COUNT = 4;
 
-/* Dynamic topics pool (only used if those tags exist in content) */
+/* Dynamic topics pool */
 const FEATURED_TOPICS = [
   { tag:'Politics', head:'Interested in politics?', sub:'Here are stories that will feed that hunger!' },
   { tag:'Local',    head:'What’s happening nearby?', sub:'Local stories, close to home.' },
@@ -37,10 +37,7 @@ function setCookie(name,value,days=365){
 function getStoredTheme(){
   const c=getCookie(THEME_COOKIE);
   if(c==='dark'||c==='light') return c;
-  try{
-    const s=localStorage.getItem(THEME_COOKIE);
-    if(s==='dark'||s==='light') return s;
-  }catch{}
+  try{ const s=localStorage.getItem(THEME_COOKIE); if(s==='dark'||s==='light') return s; }catch{}
   return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
 }
 function applyTheme(theme){
@@ -64,8 +61,7 @@ function initTheme(){
       setCookie(THEME_COOKIE,next,365);
     });
   }
-  // Respect system changes only if user hasn't chosen explicitly
-  const explicit = getCookie(THEME_COOKIE) || (()=>{try{return localStorage.getItem(THEME_COOKIE)}catch{return null}})();
+  const explicit=getCookie(THEME_COOKIE) || (()=>{try{return localStorage.getItem(THEME_COOKIE)}catch{return null}})();
   if(!explicit && window.matchMedia){
     const mq=window.matchMedia('(prefers-color-scheme: dark)');
     mq.addEventListener?.('change',e=>applyTheme(e.matches?'dark':'light'));
@@ -96,8 +92,7 @@ function parseFrontmatter(text){
   if(!src.startsWith('---\n') && src!=='---'){ return {meta:{}, body:src.trim()}; }
   const lines=src.split('\n'); const meta={}; let i=1;
   for(;i<lines.length;i++){
-    const line=lines[i].trim();
-    if(line==='---'){ i++; break; }
+    const line=lines[i].trim(); if(line==='---'){ i++; break; }
     if(!line) continue;
     const m=line.match(/^([^:]+)\s*:\s*(.*)$/);
     if(m) meta[m[1].trim()] = m[2].trim();
@@ -224,8 +219,7 @@ function enhanceImages(){
 
 /* ---------- A11y helpers ---------- */
 function ensureListRoles(){
-  const ids=['top-stories','right-rail','sidebar-latest'];
-  ids.forEach(id=>{
+  ['top-stories','right-rail','sidebar-latest'].forEach(id=>{
     const el=document.getElementById(id);
     if(el && !el.getAttribute('role')) el.setAttribute('role','list');
   });
@@ -244,11 +238,13 @@ function leadCardHTML(item){
   const url    = `article.html?article=${encodeURIComponent(file)}`;
   const dek    = meta.Subtitle ? `<p class="hero-dek">${escapeHtml(meta.Subtitle)}</p>` : '';
 
-  // NOTE: We include a hidden lead image only to mirror into hero-art on the right panel if present.
+  // Real elements: hidden lead-bg image + title link
   return `
-    ${escapeAttr(img)}
+    <div class="lead-media" style="display:none">
+      <img class="lead-bg" src="${escapeAttr(img)}" alt="" />
+    </div>
     ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-    <h2 class="lead-title">${escapeAttr(url)}${escapeHtml(title)}</a></h2>
+    <h2 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h2>
     <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     ${dek}
   `;
@@ -262,11 +258,11 @@ function topCardHTML(item){
   const url    = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    ${escapeAttr(url)}
-      ${escapeAttr(img)}
+    <a class="top-thumb-wrap" href="${escapeAttr(url)}" aria-label="${escapeHtml(title)}">
+      <img class="top-thumb" src="${escapeAttr(img)}" alt="" />
     </a>
     <div class="top-body">
-      <h3 class="top-title">${escapeAttr(url)}${escapeHtml(title)}</a></h3>
+      <h3 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
@@ -288,7 +284,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    ${escapeAttr(img)}
+    <img class="card-img" src="${escapeAttr(img)}" alt="" />
     <div class="card-body">
       ${chip}${tags}
       <h3 class="card-title">${escapeHtml(title)}</h3>
@@ -326,7 +322,7 @@ async function renderHome(){
     leadEl.innerHTML = leadCardHTML(data[0]);
     leadEl.removeAttribute('aria-busy');
 
-    // Mirror the lead (hidden) image into the right hero art if that element exists
+    // Mirror lead image into hero art (if present)
     try{
       const hiddenImg=leadEl.querySelector('.lead-bg');
       const art=document.getElementById('hero-art');
@@ -346,7 +342,7 @@ async function renderHome(){
     }
   }
 
-  // Trending
+  // Trending — proper anchors
   if(trend){
     const counts=new Map();
     for(const it of data){
@@ -354,7 +350,7 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k])=>`newsletters.html?tag=${encodeURIComponent(k)}${escapeHtml(k)}</a>`).join('')
+      ? topTags.map(([k])=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
@@ -367,13 +363,13 @@ async function renderHome(){
 /* ---------- Dynamic sections ---------- */
 function seededRand(seed){ let x=Math.sin(seed)*10000; return ()=>{ x=(x*9301+49297)%233280; return x/233280; }; }
 function chooseTopics(allItems){
-  const dayKey = Number(new Date().toISOString().slice(0,10).replace(/-/g,''));
-  const rand = seededRand(dayKey);
+  const dayKey=Number(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  const rand=seededRand(dayKey);
   const present=new Set();
   for(const it of allItems){ for(const t of (it.meta._tags||[])) present.add(t.toLowerCase()); }
   const pool=FEATURED_TOPICS.filter(t=>present.has(t.tag.toLowerCase()));
   if(pool.length===0) return [];
-  const count = Math.min(pool.length, (rand()>0.5 ? 3 : 2));
+  const count=Math.min(pool.length, (rand()>0.5 ? 3 : 2));
   const picked=[]; const used=new Set();
   while(picked.length<count && used.size<pool.length){
     const idx=Math.floor(rand()*pool.length);
@@ -437,12 +433,14 @@ async function renderListPage(){
 
   const data=await loadVisibleSorted();
 
+  // Category chips — real anchors
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML = cats.map(c=>`newsletters.html?category=${encodeURIComponent(c)}${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML = cats.map(c=>`<a class="chip" href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
   }
 
+  // Tag cloud — real anchors with toggle behavior
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
@@ -454,14 +452,12 @@ async function renderListPage(){
       const current=(url.searchParams.get('tag')||'').split(',').map(s=>s.trim()).filter(Boolean).map(x=>x.toLowerCase());
       const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
       if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-      return `${escapeAttr(url.pathname + url.search)}${escapeHtml(t)}</a>`;
+      return `<a class="chip" href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
     }).join('') : '<span class="muted">No tags yet</span>';
   }
 
-  let filtered = activeCat
-    ? data.filter(i=>(i.meta.Category||'').trim().toLowerCase()===activeCat.toLowerCase())
-    : data;
-
+  // Filter + render
+  let filtered = activeCat ? data.filter(i=>(i.meta.Category||'').trim().toLowerCase()===activeCat.toLowerCase()) : data;
   if(activeTags.length){
     filtered = filtered.filter(i=>{
       const tags=(i.meta._tags||[]).map(t=>t.toLowerCase());
@@ -493,7 +489,7 @@ async function renderListPage(){
   hookHoverPrefetch();
 }
 
-/* ---------- OG/Twitter & Canonical helpers (article) ---------- */
+/* ---------- OG/Twitter & Canonical (article) ---------- */
 function applyOpenGraph(meta, file){
   const title=(meta.Title||file||'Article').trim();
   const desc =(meta.Subtitle||'').trim();
@@ -554,17 +550,15 @@ function renderArticle(container, filename, meta, body){
   const reading=readingTimeFromText(body,200);
   const rt=document.getElementById('article-reading-time'); if(rt) rt.textContent=` • ${reading}`;
 
-  // Tags
   const tags=(meta.Tags?splitTags(meta.Tags):[]);
   const bylineWrap=document.querySelector('.a-hero .a-hero-inner') || document.querySelector('.a-hero-inner') || document.querySelector('.a-hero');
   if(tags.length && bylineWrap){
     const tagDiv=document.createElement('div');
     tagDiv.className='a-tags';
-    tagDiv.innerHTML = tags.map(t=>`newsletters.html?tag=${encodeURIComponent(t)}${escapeHtml(t)}</a>`).join('');
+    tagDiv.innerHTML = tags.map(t=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
     bylineWrap.appendChild(tagDiv);
   }
 
-  // Body (safe)
   const toHtml = (txt)=>{
     if(typeof window!=='undefined' && window.marked && window.DOMPurify){
       return window.DOMPurify.sanitize(window.marked.parse(String(txt??'')));
@@ -641,7 +635,7 @@ function initHeroParallax(){
 
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('script.js v7.2 (core) loaded');
+  console.log('script.js v7.2.1 (hotfix) loaded');
   initTheme();
   initMobile();
   markCurrentNav();
@@ -652,3 +646,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initArticlePage();
   initHeroParallax();
 });
+``
