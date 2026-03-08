@@ -1,18 +1,15 @@
-/* Sleepy Hallow Media — App (v6.3.0)
+/* Sleepy Hallow Media — App (v6.4.0)
    Warm, whimsical‑but‑radical UX. Dynamic topic sections. Sticky share.
-   Sleek Newsletters grid with compact mode for small result sets.
+   This build removes all references to #latest-grid (container removed in index.html)
+   and fixes all templates to output REAL <a> and <img> tags (no raw URL text). */
 
-   CRITICAL: All templates below output REAL <a> and <img> elements (no raw URL text),
-   which removes the stray text block on the homepage.
-*/
 'use strict';
 
 /* ---------- Config ---------- */
 const MANIFEST = 'newsletters/index.json';
 const NEWS_DIR = 'newsletters/';
 const DEFAULT_THUMB = 'thumbnails/placeholder.png';
-const HOMEPAGE_LATEST_LIMIT = 12;
-const SIDEBAR_LATEST_LIMIT = 8;
+const TOP_RAIL_COUNT = 4;   // how many items to show in the right rail
 
 /* Topic library (rotates). Use tags you actually publish with. */
 const FEATURED_TOPICS = [
@@ -82,14 +79,12 @@ function escapeHtml(str){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
-/* For attribute values only */
-function escapeAttrVal(str){ return escapeHtml(String(str)); }
-
+function escapeAttr(str){ return escapeHtml(String(str)); }
 function sanitizeFilename(filename){
   if(!filename || typeof filename!=='string') return '';
   let f = filename.replace(/\\/g,'/').trim();
   if(f.startsWith('/')) f=f.slice(1);
-  if(f.includes('..') || f.startsWith('http:') || f.startsWith('https:')) return '';
+  if(f.includes('..') || /^https?:/i.test(f)) return '';
   return f;
 }
 function parseFrontmatter(text){
@@ -112,8 +107,7 @@ async function loadManifest(){
     const res=await fetch(MANIFEST,{cache:'no-store'});
     if(!res.ok) throw new Error(`Manifest not found: ${MANIFEST}`);
     const data=await res.json();
-    if(!Array.isArray(data)) return [];
-    return data.map(sanitizeFilename).filter(Boolean);
+    return Array.isArray(data) ? data.map(sanitizeFilename).filter(Boolean) : [];
   }catch(err){
     console.warn('Could not load manifest:',err);
     return [];
@@ -131,8 +125,7 @@ async function loadNewsletter(filename){
 function formatDate(dateStr){
   if(!dateStr) return '';
   const d=new Date(dateStr);
-  if(Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString();
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString();
 }
 function resolveThumbPath(t){
   if(!t) return DEFAULT_THUMB;
@@ -158,7 +151,7 @@ function renderMarkdownSafe(text){
   return String(text??'').split(/\n\s*\n/).map(p=>`<p>${escapeHtml(p.trim())}</p>`).join('');
 }
 
-/* ---------- Nav / header ---------- */
+/* ---------- Header / Search ---------- */
 function markCurrentNav(){
   const file=(location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const map={'index.html':'home','newsletters.html':'newsletters'};
@@ -213,34 +206,10 @@ async function loadVisibleSorted(){
   return visible;
 }
 
-/* ---------- Search ranking ---------- */
-function normalize(str){ return String(str??'').toLowerCase(); }
-function itemScore(item,q){
-  const {meta,body}=item; const nQ=normalize(q); let score=0;
-  const addIf=(c,w)=>{if(c)score+=w;};
-  addIf(normalize(meta.Title).includes(nQ),8);
-  addIf(normalize(meta.Subtitle).includes(nQ),5);
-  addIf(normalize(meta.Author).includes(nQ),4);
-  addIf(normalize(meta.Category).includes(nQ),4);
-  addIf((meta._tags||[]).some(t=>normalize(t).includes(nQ)),3);
-  addIf(normalize(body).slice(0,800).includes(nQ),1);
-  return score;
-}
-function searchItems(items,query){
-  const q=query?.trim(); if(!q) return items;
-  const ranked=items
-    .map(it=>({it,s:itemScore(it,q)}))
-    .filter(x=>x.s>0)
-    .sort((a,b)=> b.s - a.s || (b.it.meta._dateObj - a.it.meta._dateObj));
-  return ranked.map(x=>x.it);
-}
-
-/* ---------- Prefetch + warm cache ---------- */
-const PREFETCH_KEY_PREFIX='pre:';
-function getPrefetchKey(file){ return PREFETCH_KEY_PREFIX + file; }
+/* ---------- Prefetch ---------- */
 async function primeArticle(file){
   const f=sanitizeFilename(file); if(!f) return;
-  const key=getPrefetchKey(f);
+  const key='pre:'+f;
   if(sessionStorage.getItem(key)) return;
   try{
     const path=f.startsWith('newsletters/')?f:`${NEWS_DIR}${f}`;
@@ -253,27 +222,17 @@ async function primeArticle(file){
 function hookHoverPrefetch(){
   document.addEventListener('mouseover', e=>{
     const a=e.target.closest('a[href*="article.html?"]'); if(!a) return;
-    const u=new URL(a.href, location.href); const file=u.searchParams.get('article'); primeArticle(file);
+    const u=new URL(a.href, location.href);
+    primeArticle(u.searchParams.get('article'));
   }, {passive:true});
   document.addEventListener('focusin', e=>{
     const a=e.target.closest('a[href*="article.html?"]'); if(!a) return;
-    const u=new URL(a.href, location.href); const file=u.searchParams.get('article'); primeArticle(file);
+    const u=new URL(a.href, location.href);
+    primeArticle(u.searchParams.get('article'));
   });
-  const io=new IntersectionObserver((entries)=>{
-    for(const entry of entries){
-      if(entry.isIntersecting){
-        const a=entry.target;
-        try{
-          const u=new URL(a.href, location.href); const file=u.searchParams.get('article'); primeArticle(file);
-        }catch{}
-        io.unobserve(a);
-      }
-    }
-  },{rootMargin:'300px 0px'});
-  document.querySelectorAll('a[href*="article.html?"]').forEach(a=>io.observe(a));
 }
 
-/* ---------- Image hints ---------- */
+/* ---------- Images ---------- */
 function enhanceImages(){
   document.querySelectorAll('.top-card img').forEach(img=>{
     img.loading='lazy'; img.decoding='async'; img.sizes='(max-width:980px) 92vw, 120px';
@@ -286,14 +245,12 @@ function enhanceImages(){
   if(hero){ hero.decoding='async'; }
 }
 
-/* ---------- A11y helpers ---------- */
+/* ---------- A11y ---------- */
 function ensureListRoles(){
   const top = document.getElementById('top-stories');
-  const latest = document.getElementById('latest-grid');
   const right = document.getElementById('right-rail');
   const sideList = document.getElementById('sidebar-latest');
   if(top && !top.getAttribute('role')) top.setAttribute('role','list');
-  if(latest && !latest.getAttribute('role')) latest.setAttribute('role','list');
   if(right && !right.getAttribute('role')) right.setAttribute('role','list');
   if(sideList && !sideList.getAttribute('role')) sideList.setAttribute('role','list');
 }
@@ -301,8 +258,6 @@ function ensureListRoles(){
 /* ============================
    Card builders — REAL TAGS
    ============================ */
-
-/* Lead/hero card: overlay link + background image + title link */
 function leadCardHTML(item){
   const { file, meta } = item;
   const title  = meta.Title || file;
@@ -313,17 +268,15 @@ function leadCardHTML(item){
   const url    = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    <a class="card-overlay" href="${escapeAttrVal(url)}" aria-label="${escapeAttrVal(title)}"></a>
-    <img class="lead-bg" src="${escapeAttrVal(img)}" alt="" width="1280" height="720" />
+    <a class="card-overlay" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}"></a>
+    <img class="lead-bg" src="${escapeAttr(img)}" alt="" width="1280" height="720" loading="eager" decoding="async"/>
     <div class="lead-body">
       ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-      <h2 class="lead-title"><a href="${escapeAttrVal(url)}">${escapeHtml(title)}</a></h2>
+      <h2 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h2>
       <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
 }
-
-/* Right‑rail “top” card (thumb + title) */
 function topCardHTML(item){
   const { file, meta } = item;
   const title  = meta.Title || file;
@@ -333,17 +286,15 @@ function topCardHTML(item){
   const url    = `article.html?article=${encodeURIComponent(file)}`;
 
   return `
-    <a href="${escapeAttrVal(url)}" aria-label="${escapeAttrVal(title)}">
-      <img class="top-thumb" src="${escapeAttrVal(img)}" alt="" />
+    <a href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}">
+      <img class="top-thumb" src="${escapeAttr(img)}" alt="" width="160" height="120" loading="lazy" decoding="async"/>
     </a>
     <div class="top-body">
-      <h3 class="top-title"><a href="${escapeAttrVal(url)}">${escapeHtml(title)}</a></h3>
+      <h3 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
 }
-
-/* Grid card used in Latest and dynamic topic sections (entire card is a link) */
 function gridCard(item){
   const { file, meta } = item;
   const img    = resolveThumbPath(meta.Thumbnail);
@@ -361,7 +312,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    <img class="card-img" src="${escapeAttrVal(img)}" alt="" />
+    <img class="card-img" src="${escapeAttr(img)}" alt="" loading="lazy" decoding="async"/>
     <div class="card-body">
       ${chip}${tags}
       <h3 class="card-title">${escapeHtml(title)}</h3>
@@ -371,20 +322,18 @@ function gridCard(item){
   return a;
 }
 
-/* ---------- Homepage render ---------- */
+/* ---------- Homepage render (no #latest-grid) ---------- */
 async function renderHome(){
-  const leadEl  = document.getElementById('lead-story');
-  const topEl   = document.getElementById('top-stories');
-  const latest  = document.getElementById('latest-grid');
-  const sList   = document.getElementById('sidebar-latest');
-  const trend   = document.getElementById('trend-topics');
+  const leadEl = document.getElementById('lead-story');
+  const topEl  = document.getElementById('top-stories');
+  const sList  = document.getElementById('sidebar-latest'); // optional
+  const trend  = document.getElementById('trend-topics');    // optional
 
-  if(!leadEl && !topEl && !latest && !sList && !trend) return;
+  if(!leadEl && !topEl && !sList && !trend) return;
 
-  if(leadEl)  leadEl.setAttribute('aria-busy','true');
-  if(latest)  latest.setAttribute('aria-busy','true');
+  if(leadEl){ leadEl.setAttribute('aria-busy','true'); }
 
-  const data = await loadVisibleSorted();
+  const data=await loadVisibleSorted();
 
   // Empty state
   if(!data.length){
@@ -396,56 +345,46 @@ async function renderHome(){
         </div>`;
       leadEl.removeAttribute('aria-busy');
     }
-    if(topEl)   topEl.innerHTML   = `<div class="muted" role="status">No top stories available.</div>`;
-    if(latest){ latest.innerHTML  = `<div class="muted" role="status">No latest stories to show.</div>`; latest.removeAttribute('aria-busy'); }
-    if(trend)   trend.innerHTML   = `<span class="muted">No trending tags yet</span>`;
+    if(topEl){ topEl.innerHTML = `<div class="muted" role="status">No top stories available.</div>`; }
+    if(trend){ trend.innerHTML = `<span class="muted">No trending tags yet</span>`; }
     return;
   }
 
-  // Lead
+  // Lead hero
   if(leadEl){
     leadEl.innerHTML = leadCardHTML(data[0]);
     leadEl.removeAttribute('aria-busy');
   }
 
-  // Top rail (next 4)
+  // Right rail (top stories)
   if(topEl){
-    topEl.innerHTML = '';
-    for(const item of data.slice(1,5)){
-      const card = document.createElement('article');
-      card.className = 'top-card';
+    topEl.innerHTML='';
+    for(const item of data.slice(1, 1 + TOP_RAIL_COUNT)){
+      const card=document.createElement('article');
+      card.className='top-card';
       card.setAttribute('role','listitem');
-      card.innerHTML = topCardHTML(item);
+      card.innerHTML=topCardHTML(item);
       topEl.appendChild(card);
     }
   }
 
-  // Latest grid (next 12)
-  if(latest){
-    latest.innerHTML = '';
-    for(const item of data.slice(5, 5 + HOMEPAGE_LATEST_LIMIT)){
-      latest.appendChild(gridCard(item));
-    }
-    latest.removeAttribute('aria-busy');
-  }
-
-  // Sidebar latest list
+  // (Optional) sidebar list if present
   if(sList){
-    sList.innerHTML = '';
-    for(const item of data.slice(5, 5 + SIDEBAR_LATEST_LIMIT)){
-      const li   = document.createElement('li');
+    sList.innerHTML='';
+    for(const item of data.slice(1 + TOP_RAIL_COUNT, 1 + TOP_RAIL_COUNT + 6)){
+      const li=document.createElement('li');
       li.setAttribute('role','listitem');
-      const date = formatDate(item.meta.Date);
-      const url  = `article.html?article=${encodeURIComponent(item.file)}`;
-      const title= item.meta.Title || item.file;
-      li.innerHTML = `<a href="${escapeAttrVal(url)}">${escapeHtml(title)}</a>
+      const date=formatDate(item.meta.Date);
+      const url = `article.html?article=${encodeURIComponent(item.file)}`;
+      const title=item.meta.Title || item.file;
+      li.innerHTML = `<a href="${escapeAttr(url)}">${escapeHtml(title)}</a>
       <div class="muted" style="font-size:.85rem">${escapeHtml(date)}</div>`;
       sList.appendChild(li);
     }
     sList.removeAttribute('aria-busy');
   }
 
-  // Trending tags — REAL anchors
+  // Trending tags
   if(trend){
     const counts=new Map();
     for(const it of data){
@@ -456,11 +395,11 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k]) => `<a href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
+      ? topTags.map(([k])=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
-  // Dynamic topic sections + playful copy
+  // Dynamic topic sections + playful copy (still appears after About)
   renderDynamicSections(data);
 
   enhanceImages();
@@ -468,7 +407,7 @@ async function renderHome(){
   hookHoverPrefetch();
 }
 
-/* ---------- Dynamic sections after About ---------- */
+/* ---------- Dynamic sections (unchanged) ---------- */
 function seededRand(seed){
   let x = Math.sin(seed) * 10000;
   return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; };
@@ -482,10 +421,10 @@ function chooseTopics(allItems){
   if(pool.length === 0) return [];
   const count = Math.min(pool.length, (rand() > 0.5 ? 3 : 2));
   const picked = [];
-  const usedIdx = new Set();
-  while(picked.length < count && usedIdx.size < pool.length){
+  const used = new Set();
+  while(picked.length < count && used.size < pool.length){
     const idx = Math.floor(rand()*pool.length);
-    if(!usedIdx.has(idx)){ usedIdx.add(idx); picked.push(pool[idx]); }
+    if(!used.has(idx)){ used.add(idx); picked.push(pool[idx]); }
   }
   return picked;
 }
@@ -518,11 +457,31 @@ function renderDynamicSections(allItems){
 }
 
 /* ---------- Newsletters list page ---------- */
-function setCompactGrid(container, itemCount){
-  if(itemCount <= 3){ container.classList.add('is-compact'); }
-  else { container.classList.remove('is-compact'); }
-}
 function parseTagsParam(value){ if(!value) return []; return value.split(',').map(s=>s.trim()).filter(Boolean); }
+function setCompactGrid(container, itemCount){
+  if(itemCount <= 3) container.classList.add('is-compact');
+  else container.classList.remove('is-compact');
+}
+function normalize(str){ return String(str??'').toLowerCase(); }
+function itemScore(item,q){
+  const {meta,body}=item; const nQ=normalize(q); let score=0;
+  const addIf=(c,w)=>{if(c)score+=w;};
+  addIf(normalize(meta.Title).includes(nQ),8);
+  addIf(normalize(meta.Subtitle).includes(nQ),5);
+  addIf(normalize(meta.Author).includes(nQ),4);
+  addIf(normalize(meta.Category).includes(nQ),4);
+  addIf((meta._tags||[]).some(t=>normalize(t).includes(nQ)),3);
+  addIf(normalize(body).slice(0,800).includes(nQ),1);
+  return score;
+}
+function searchItems(items,query){
+  const q=query?.trim(); if(!q) return items;
+  return items
+    .map(it=>({it,s:itemScore(it,q)}))
+    .filter(x=>x.s>0)
+    .sort((a,b)=> b.s - a.s || (b.it.meta._dateObj - a.it.meta._dateObj))
+    .map(x=>x.it);
+}
 async function renderListPage(){
   const container=document.getElementById('news-list');
   if(!container) return;
@@ -536,23 +495,18 @@ async function renderListPage(){
 
   const data=await loadVisibleSorted();
 
-  // Category chips — REAL anchors
+  // Category chips
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML=cats.map(c => `<a href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML=cats.map(c=>`<a class="chip" href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
   }
 
-  // Tag cloud (toggle) — REAL anchors
+  // Tag cloud with toggle links
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
-    for(const i of data){
-      for(const t of (i.meta._tags||[])){
-        const key=t.trim(); if(!key) continue;
-        counts.set(key,(counts.get(key)||0)+1);
-      }
-    }
+    for(const i of data){ for(const t of (i.meta._tags||[])){ const k=t.trim(); if(k) counts.set(k,(counts.get(k)||0)+1); } }
     const list=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,20);
     tagWrap.innerHTML = list.length
       ? list.map(([t])=>{
@@ -561,12 +515,12 @@ async function renderListPage(){
           const current=(url.searchParams.get('tag')||'').split(',').map(s=>s.trim()).filter(Boolean).map(x=>x.toLowerCase());
           const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
           if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-          return `<a href="${escapeAttrVal(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
+          return `<a class="chip" href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
         }).join('')
       : '<span class="muted">No tags yet</span>';
   }
 
-  // Filtered set
+  // Filter
   let filtered=activeCat
     ? data.filter(i=>(i.meta.Category||'').trim().toLowerCase()===activeCat.toLowerCase())
     : data;
@@ -578,7 +532,7 @@ async function renderListPage(){
   }
   if(q) filtered=searchItems(filtered,q);
 
-  // Active filter banner
+  // Banner
   const info=document.getElementById('active-filter');
   if(info){
     const parts=[];
@@ -588,7 +542,7 @@ async function renderListPage(){
     info.textContent = parts.length ? `${filtered.length} result(s) — ${parts.join(' • ')}` : '';
   }
 
-  // Render or empty state
+  // Render
   container.innerHTML='';
   if(!filtered.length){
     container.innerHTML=`<p class="muted">No items found${q?` for “${escapeHtml(q)}”`:''}${activeCat?` in ${escapeHtml(activeCat)}`:''}${activeTags.length?` with tags: ${escapeHtml(activeTags.join(', '))}`:''}.</p>`;
@@ -597,10 +551,7 @@ async function renderListPage(){
     return;
   }
   for(const item of filtered){ container.appendChild(gridCard(item)); }
-
-  // Toggle compact mode for 1–3 results (prevents blown‑up cards)
   setCompactGrid(container, filtered.length);
-
   container.removeAttribute('aria-busy');
 
   enhanceImages();
@@ -629,7 +580,7 @@ function applyOpenGraph(meta, file){
   const twI = document.getElementById('tw-image');
   if (twT && !twT.content) twT.content = title;
   if (twD && !twD.content && desc) twD.content = desc;
-  if (twI && (!twI.content || twI.content === '')) twI.content = img;
+  if (twI && !twI.content) twI.content = img;
 
   const canon = document.getElementById('canonical');
   if (canon) { try { canon.href = url; } catch {} }
@@ -689,7 +640,7 @@ function renderArticle(container, filename, meta, body){
   if(tags.length && bylineWrap){
     const tagDiv=document.createElement('div');
     tagDiv.className='a-tags';
-    tagDiv.innerHTML = tags.map(t=>`<a href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
+    tagDiv.innerHTML = tags.map(t=>`<a class="chip" href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
     bylineWrap.appendChild(tagDiv);
   }
 
@@ -722,8 +673,7 @@ async function initArticlePage(){
     return;
   }
 
-  const warmKey='pre:'+file;
-  const warmed=sessionStorage.getItem(warmKey);
+  const warmed=sessionStorage.getItem('pre:'+file);
   if(warmed){
     try{
       const parsed=parseFrontmatter(warmed);
@@ -746,12 +696,12 @@ async function initArticlePage(){
 
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('script.js v6.3.0 loaded');
+  console.log('script.js v6.4.0 loaded (no latest-grid)');
   initTheme();
   initMobile();
   markCurrentNav();
   hijackHeaderSearch();
-  renderHome();
-  renderListPage();
-  initArticlePage();
+  renderHome();        // safe if #lead-story / #top-stories / #trend-topics exist
+  renderListPage();    // safe on newsletters.html
+  initArticlePage();   // safe on article.html
 });
