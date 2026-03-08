@@ -1,6 +1,6 @@
-/* Sleepy Hallow Media — App (v6.0)
+/* Sleepy Hallow Media — App (v6.1)
    Warm, whimsical-but-radical UX. Dynamic topic sections. Sticky share.
-   Keeps content pipeline (newsletters/*.txt via index.json). */
+   Smoother Newsletters grid with compact mode for small result sets. */
 
 'use strict';
 
@@ -303,11 +303,11 @@ function leadCardHTML(item){
   const img = resolveThumbPath(meta.Thumbnail);
   const url = `article.html?article=${encodeURIComponent(file)}`;
   return `
-    <a class="card-overlay" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}"></a>
-    <img class="lead-bg" src="${escapeAttr(img)}" alt="">
+    ${escapeAttr(url)}</a>
+    ${escapeAttr(img)}
     <div class="lead-body">
       ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
-      <h2 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h2>
+      <h2 class="lead-title">${escapeAttr(url)}${escapeHtml(title)}</a></h2>
       <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
@@ -320,11 +320,11 @@ function topCardHTML(item){
   const author = meta.Author || 'Staff';
   const url = `article.html?article=${encodeURIComponent(file)}`;
   return `
-    <a class="top-thumb-link" href="${escapeAttr(url)}" aria-label="${escapeAttr(title)}">
-      <img class="top-thumb" src="${escapeAttr(img)}" alt="">
+    ${escapeAttr(url)}
+      ${escapeAttr(img)}
     </a>
     <div class="top-body">
-      <h3 class="top-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
+      <h3 class="top-title">${escapeAttr(url)}${escapeHtml(title)}</a></h3>
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>
   `;
@@ -345,7 +345,7 @@ function gridCard(item){
   a.setAttribute('aria-label', title);
   a.setAttribute('role','listitem');
   a.innerHTML = `
-    <img class="card-img" src="${escapeAttr(img)}" alt="">
+    ${escapeAttr(img)}
     <div class="card-body">
       ${chip}${tags}
       <h3 class="card-title">${escapeHtml(title)}</h3>
@@ -424,7 +424,7 @@ async function renderHome(){
     }
     const topTags=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
     trend.innerHTML = topTags.length
-      ? topTags.map(([k])=>`<a href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
+      ? topTags.map(([k])=>`newsletters.html?tag=${encodeURIComponent(k)}${escapeHtml(k)}</a>`).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
 
@@ -444,14 +444,12 @@ function seededRand(seed){
 }
 function chooseTopics(allItems){
   // Pick 2–3 topics that actually exist in content, rotate daily
-  // Seed by YYYYMMDD so it feels fresh each day
   const dayKey = Number(new Date().toISOString().slice(0,10).replace(/-/g,''));
   const rand = seededRand(dayKey);
   const present = new Set();
   for(const it of allItems){ for(const t of (it.meta._tags||[])) present.add(t.toLowerCase()); }
   const pool = FEATURED_TOPICS.filter(t => present.has(t.tag.toLowerCase()));
   if(pool.length === 0) return [];
-  // pick count = 2 or 3
   const count = Math.min(pool.length, (rand() > 0.5 ? 3 : 2));
   const picked = [];
   const usedIdx = new Set();
@@ -492,7 +490,17 @@ function renderDynamicSections(allItems){
   }
 }
 
-/* ---------- List page ---------- */
+/* ---------- Newsletters list page ---------- */
+
+/* Compact mode toggler: keep small result sets from stretching cards */
+function setCompactGrid(container, itemCount){
+  if(itemCount <= 3){
+    container.classList.add('is-compact');
+  }else{
+    container.classList.remove('is-compact');
+  }
+}
+
 function parseTagsParam(value){ if(!value) return []; return value.split(',').map(s=>s.trim()).filter(Boolean); }
 async function renderListPage(){
   const container=document.getElementById('news-list');
@@ -511,7 +519,7 @@ async function renderListPage(){
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
-    chipWrap.innerHTML=cats.map(c=>`<a href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
+    chipWrap.innerHTML=cats.map(c=>`newsletters.html?category=${encodeURIComponent(c)}${escapeHtml(c)}</a>`).join('');
   }
 
   // Tag cloud (toggle behavior)
@@ -532,7 +540,7 @@ async function renderListPage(){
           const current=parseTagsParam(url.searchParams.get('tag')||'').map(x=>x.toLowerCase());
           const next=isOn?current.filter(x=>x!==t.toLowerCase()):[...new Set([...current,t.toLowerCase()])];
           if(next.length) url.searchParams.set('tag', next.join(',')); else url.searchParams.delete('tag');
-          return `<a href="${escapeAttr(url.pathname + url.search)}">${escapeHtml(t)}</a>`;
+          return `${escapeAttr(url.pathname + url.search)}${escapeHtml(t)}</a>`;
         }).join('')
       : '<span class="muted">No tags yet</span>';
   }
@@ -563,12 +571,17 @@ async function renderListPage(){
   container.innerHTML='';
   if(!filtered.length){
     container.innerHTML=`<p class="muted">No items found${q?` for “${escapeHtml(q)}”`:''}${activeCat?` in ${escapeHtml(activeCat)}`:''}${activeTags.length?` with tags: ${escapeHtml(activeTags.join(', '))}`:''}.</p>`;
+    setCompactGrid(container, 0);
     container.removeAttribute('aria-busy');
     return;
   }
   for(const item of filtered){
     container.appendChild(gridCard(item));
   }
+
+  // Toggle compact mode for 1–3 results (prevents blown-up cards)
+  setCompactGrid(container, filtered.length);
+
   container.removeAttribute('aria-busy');
 
   enhanceImages();
@@ -655,7 +668,7 @@ function renderArticle(container, filename, meta, body){
   if(tags.length && bylineWrap){
     const tagDiv=document.createElement('div');
     tagDiv.className='a-tags';
-    tagDiv.innerHTML = tags.map(t=>`<a href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
+    tagDiv.innerHTML = tags.map(t=>`newsletters.html?tag=${encodeURIComponent(t)}${escapeHtml(t)}</a>`).join('');
     bylineWrap.appendChild(tagDiv);
   }
 

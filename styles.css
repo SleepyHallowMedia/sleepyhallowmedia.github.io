@@ -1,6 +1,6 @@
-/* Sleepy Hallow Media — Magazine Theme (v6.0)
+/* Sleepy Hallow Media — Magazine Theme (v6.1)
    Warm, whimsical-but-radical palette. Light/Dark. Comfortable density.
-   Layout + components align with script.js v6.0.  */
+   Layout + components align with script.js v6.1.  */
 
 /* ============================================================
    THEME TOKENS (Warm neutrals + amber/coral accents)
@@ -305,6 +305,11 @@ a:focus-visible { outline: var(--ring); outline-offset: 2px; border-radius: 6px;
 .top-title a:hover, .card-title a:hover{ color: var(--link-hover); }
 .top-meta{ color: var(--muted); font-size:.72rem; }
 
+/* Keep right-rail tidy on very wide screens */
+@media (min-width: 1100px){
+  .top-stories{ max-width: 380px; }
+}
+
 /* Latest + sidebar grid */
 .content-grid{
   display:grid; grid-template-columns: 2fr 1fr; gap: clamp(12px, 2.6vw, 20px);
@@ -315,22 +320,67 @@ a:focus-visible { outline: var(--ring); outline-offset: 2px; border-radius: 6px;
   font-size: var(--h2); margin: 1rem 0 .8rem;
 }
 
-/* Cards grid */
+/* ============================================================
+   CARDS GRID — SLEEK, CONSISTENT, NEVER BLOWS UP
+   ============================================================ */
+
+/* Default: steady column width; never scale cards to full row */
 .cards-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
-  gap: clamp(10px, 1.8vw, 16px);
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: clamp(10px, 1.6vw, 16px);
+  align-items: start;
 }
+
+/* On very wide screens, cap card width and center the grid */
+@media (min-width: 1280px){
+  .cards-grid{
+    grid-template-columns: repeat(auto-fill, minmax(270px, 320px));
+    justify-content: center;
+  }
+}
+
+/* Compact mode (<=3 results): center fixed-width cards */
+.cards-grid.is-compact{
+  grid-template-columns: repeat(auto-fit, 320px);
+  justify-content: center;
+}
+
+/* Cards */
 .card{
   display:flex; flex-direction:column; background: var(--card-bg);
   border:1px solid var(--panel-line); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-sm);
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
 }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); background: var(--card-bg-hover); }
-.card-img{ width:100%; aspect-ratio:16/9; object-fit:cover; background: var(--thumb-bg); transition: transform .22s ease; }
-.card:hover .card-img{ transform: scale(1.02); }
+
+.card-img{
+  width:100%; aspect-ratio:16/9; object-fit:cover; background: var(--thumb-bg);
+  transition: transform .22s ease;
+}
+.card:hover .card-img{ transform: scale(1.015); }
+
 .card-body{ padding: 10px 12px 14px; display:flex; flex-direction:column; gap: 6px; }
 .card-meta{ color: var(--muted); font-size:.72rem; }
 .card-sub{ margin:0; color: var(--muted); font-size:.78rem; }
+
+/* Title/dek clamps to keep heights tidy */
+.card-title{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-sub{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Subtle busy-state fade to smooth filter transitions */
+.cards-grid[aria-busy="true"]{ opacity: .6; filter: saturate(.95); transition: opacity .12s ease, filter .12s ease; }
+.cards-grid:not([aria-busy="true"]){ opacity: 1; transition: opacity .12s ease, filter .12s ease; }
 
 /* Chips */
 .chip{
