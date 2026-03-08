@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
   <title>Sleepy Hallow Media — Article</title>
+
   <!-- Canonical filled at runtime -->
   <link id="canonical" rel="canonical" href="">
 
@@ -38,15 +38,13 @@
     :root{
       /* Fallback; a script below will set this to the actual article width at runtime */
       --article-content-width: 740px;
-
       /* Tweak these to taste */
-      --rail-width: 120px;           /* matches your 120x728 skyscraper width */
-      --rail-gap: 24px;              /* space between article edge and ad rail */
-      --rails-top: 120px;            /* offset from top; avoid header overlap */
-      --rails-min-viewport: 1280px;  /* show side rails only above this width */
+      --rail-width: 120px; /* matches your 120x728 skyscraper width */
+      --rail-gap: 24px;    /* space between article edge and ad rail */
+      --rails-top: 120px;  /* offset from top; avoid header overlap */
+      --rails-min-viewport: 1280px; /* show side rails only above this width */
       --z-rails: 10;
     }
-
     /* Fixed rails: out of normal flow -> they never push content */
     .ad-rail-fixed{
       position: fixed;
@@ -55,7 +53,6 @@
       z-index: var(--z-rails);
       display: none; /* hidden by default; enabled at wide viewports */
     }
-
     /* Place rails relative to the centered article width */
     @media (min-width: var(--rails-min-viewport)){
       .ad-rail-fixed{ display:block; }
@@ -66,7 +63,6 @@
         left: calc(50% + (var(--article-content-width) / 2) + var(--rail-gap));
       }
     }
-
     /* Ensure your article stays centered (redundant if already in styles.css, harmless otherwise) */
     .article-body { max-width: 740px; margin: 0 auto; width: 100%; }
   </style>
@@ -76,12 +72,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const el = document.querySelector('.article-body');
       if (!el) return;
-
       const setArticleWidth = () => {
         const w = Math.round(el.getBoundingClientRect().width);
         if (w > 0) document.documentElement.style.setProperty('--article-content-width', w + 'px');
       };
-
       setArticleWidth(); // initial
       // Recalculate on resize/zoom
       let raf = null;
@@ -103,8 +97,8 @@
         <a class="top-link" href="newsletters.html?tag=Local">Local</a>
         <a class="top-link" href="newsletters.html?tag=Opinion">Opinion</a>
       </div>
-      <form id="site-search" class="top-search" action="newsletters.html" method="get">
-        <label for="q" class="sr-only"></label>
+      <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+        <label for="q" class="sr-only">Search the site</label>
         <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
         <button class="btn" type="submit" aria-label="Search">Search</button>
       </form>
@@ -114,7 +108,7 @@
   <header class="site-header" role="banner">
     <div class="wrap header-row">
       <a class="brand" href="index.html">
-        <img class="brand-mark" src="assets/logo.png" alt="" />
+        <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="24" height="24" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
       <nav class="primary-nav" aria-label="Primary">
@@ -122,8 +116,7 @@
         <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
       </nav>
       <div class="header-tools">
-        <button id="theme-toggle" class="theme-toggle" type="button"
-                aria-label="Toggle dark mode" aria-pressed="false">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
           <span class="theme-icon" aria-hidden="true">🌙</span>
         </button>
         <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
@@ -137,7 +130,7 @@
 
   <!-- Article hero -->
   <section id="article-hero" class="a-hero" aria-label="Article header">
-    <img class="a-hero-bg" alt="" loading="eager" decoding="async" />
+    <img class="a-hero-bg" alt="" loading="eager" decoding="async" width="1280" height="720" />
     <div class="wrap a-hero-inner">
       <div id="article-category" class="a-kicker" hidden></div>
       <h1 id="article-title" class="a-title"></h1>
@@ -158,9 +151,7 @@
            style="display:inline-block;width:120px;height:728px"
            data-ad-client="ca-pub-9198552366209337"
            data-ad-slot="7504472229"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
     <!-- RIGHT SIDE AD (fixed; does not push content) -->
@@ -170,9 +161,7 @@
            style="display:inline-block;width:120px;height:728px"
            data-ad-client="ca-pub-9198552366209337"
            data-ad-slot="7504472229"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
     <!-- Article content -->
@@ -181,10 +170,10 @@
     </article>
 
     <aside class="share-bar" aria-label="Share this article">
-      <button class="share-btn" data-share="copy">Copy Link</button>
-      <a class="share-btn" data-share="email" target="_blank" rel="noopener">Email</a>
-      <a class="share-btn" data-share="reddit" target="_blank" rel="noopener">Reddit</a>
-      <a class="share-btn" data-share="x" target="_blank" rel="noopener">X</a>
+      <button class="share-btn" data-share="copy" aria-label="Copy link to clipboard">Copy Link</button>
+      <a class="share-btn" data-share="email" target="_blank" rel="noopener" aria-label="Share via email">Email</a>
+      <a class="share-btn" data-share="reddit" target="_blank" rel="noopener" aria-label="Share on Reddit">Reddit</a>
+      <a class="share-btn" data-share="x" target="_blank" rel="noopener" aria-label="Share on X">X</a>
       <span id="share-feedback" class="share-feedback" role="status" aria-live="polite"></span>
     </aside>
   </main>
@@ -193,18 +182,21 @@
     <div class="wrap footer-grid">
       <div>
         <a class="brand" href="index.html">
-          <img class="brand-mark" src="assets/logo.png" alt="" />
+          <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="24" height="24" />
           <span class="brand-name">Sleepy Hallow Media</span>
         </a>
         <p class="muted">Independent reporting from the Hollow.</p>
       </div>
+
       <nav class="footer-links" aria-label="Footer">
         <a href="newsletters.html">Check Out Our Patreon!</a>
-        <img class="Patreon" src="assets/Patreon.png" alt="" width="32" height="16"/>
+        <img class="Patreon" src="assets/Patreon.png" alt="Patreon" width="32" height="16"/>
       </nav>
+
       <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
     </div>
   </footer>
+
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

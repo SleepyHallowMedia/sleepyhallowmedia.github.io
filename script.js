@@ -1,22 +1,20 @@
 /* Sleepy Hallow Media — Magazine Script (v5.1)
-   - Theme (light/dark)
-   - Homepage: lead + top stories + latest + sidebar + trending tags
-   - List page: search + category chips + tag filtering
-   - Article view: hero from Thumbnail + reading time + share links
-   - Perf: hover/viewport prefetch + sessionStorage warm cache + image hints
-   - OG/Twitter (client-side for non-crawlers) with sane fallbacks
-   - A11y: loading states (aria-busy), roles, and safe defaults
-   - Canonical link injection on article pages
+ - Theme (light/dark)
+ - Homepage: lead + top stories + latest + sidebar + trending tags
+ - List page: search + category chips + tag filtering
+ - Article view: hero from Thumbnail + reading time + share links
+ - Perf: hover/viewport prefetch + sessionStorage warm cache + image hints
+ - OG/Twitter (client-side for non-crawlers) with sane fallbacks
+ - A11y: loading states (aria-busy), roles, and safe defaults
+ - Canonical link injection on article pages
 */
 'use strict';
-
 /* ---------- Config ---------- */
 const MANIFEST = 'newsletters/index.json';
 const NEWS_DIR = 'newsletters/';
 const DEFAULT_THUMB = 'thumbnails/placeholder.png';
 const HOMEPAGE_LATEST_LIMIT = 12;
 const SIDEBAR_LATEST_LIMIT = 8;
-
 /* ---------- Theme ---------- */
 const THEME_COOKIE = 'theme';
 function getCookie(name){
@@ -65,21 +63,23 @@ function initTheme(){
     mq.addEventListener?.('change',e=>applyTheme(e.matches?'dark':'light'));
   }
 }
-
 /* ---------- Utils ---------- */
 function escapeHtml(str){
   if(str==null) return '';
   return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
-function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'&#96;'); }
+function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'`'); }
 function sanitizeFilename(filename){
   if(!filename || typeof filename!=='string') return '';
   let f = filename.replace(/\\/g,'/').trim();
   if(f.startsWith('/')) f=f.slice(1);
   if(f.includes('..') || f.startsWith('http:') || f.startsWith('https:')) return '';
-  return f || '';
+  return f;
 }
 function parseFrontmatter(text){
   let src=String(text??'').replace(/\r/g,'').replace(/^\uFEFF/,'').replace(/^\s+/, '');
@@ -130,7 +130,7 @@ function resolveThumbPath(t){
   if(s.startsWith('/')) return s;
   if(s.startsWith('thumbnails/')||s.startsWith('newsletters/')) return s;
   // Allow plain filename under thumbnails/
-  return s;
+  return `thumbnails/${s}`;
 }
 function isTruthy(v){
   if(v===true) return true;
@@ -149,7 +149,6 @@ function renderMarkdownSafe(text){
   }
   return String(text??'').split(/\n\s*\n/).map(p=>`<p>${escapeHtml(p.trim())}</p>`).join('');
 }
-
 /* ---------- Nav / header ---------- */
 function markCurrentNav(){
   const file=(location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -177,7 +176,6 @@ function hijackHeaderSearch(){
     }
   });
 }
-
 /* ---------- Data helpers ---------- */
 async function loadVisibleSorted(){
   const manifest=await loadManifest();
@@ -204,7 +202,6 @@ async function loadVisibleSorted(){
   });
   return visible;
 }
-
 /* ---------- Search ranking ---------- */
 function normalize(str){ return String(str??'').toLowerCase(); }
 function itemScore(item,q){
@@ -226,7 +223,6 @@ function searchItems(items,query){
     .sort((a,b)=> b.s - a.s || (b.it.meta._dateObj - a.it.meta._dateObj));
   return ranked.map(x=>x.it);
 }
-
 /* ---------- Prefetch (hover/viewport) + warm cache ---------- */
 const PREFETCH_KEY_PREFIX='pre:';
 function getPrefetchKey(file){ return PREFETCH_KEY_PREFIX + file; }
@@ -264,7 +260,6 @@ function hookHoverPrefetch(){
   },{rootMargin:'300px 0px'});
   document.querySelectorAll('a[href*="article.html?"]').forEach(a=>io.observe(a));
 }
-
 /* ---------- Image hints ---------- */
 function enhanceImages(){
   document.querySelectorAll('.top-card img').forEach(img=>{
@@ -277,26 +272,23 @@ function enhanceImages(){
   const hero=document.querySelector('.a-hero-bg');
   if(hero){ hero.decoding='async'; }
 }
-
 /* ---------- A11y helpers ---------- */
 function ensureListRoles(){
   const top = document.getElementById('top-stories');
   const latest = document.getElementById('latest-grid');
   const right = document.getElementById('right-rail');
   const sideList = document.getElementById('sidebar-latest');
-
   if(top && !top.getAttribute('role')) top.setAttribute('role','list');
   if(latest && !latest.getAttribute('role')) latest.setAttribute('role','list');
   if(right && !right.getAttribute('role')) right.setAttribute('role','list');
   if(sideList && !sideList.getAttribute('role')) sideList.setAttribute('role','list');
 }
-
 /* ---------- Card builders ---------- */
 /* Featured/Lead: we render INNER HTML only; the outer element (#lead-story) already has class="lead-card". */
 function leadCardHTML(item){
   const { file, meta } = item;
   const title = meta.Title || file;
-  const cat = meta.Category || '';
+  const cat = (meta.Category || '').trim();
   const date = formatDate(meta.Date);
   const author = meta.Author || 'Staff';
   const img = resolveThumbPath(meta.Thumbnail);
@@ -353,7 +345,6 @@ function gridCard(item){
     </div>`;
   return a;
 }
-
 /* ---------- Homepage render (with graceful fallback) ---------- */
 async function renderHome(){
   const leadEl=document.getElementById('lead-story');
@@ -361,17 +352,13 @@ async function renderHome(){
   const latest=document.getElementById('latest-grid');
   const sList=document.getElementById('sidebar-latest');
   const trend=document.getElementById('trend-topics');
-
   // If it's not the homepage, bail early.
   if(!leadEl && !topEl && !latest && !sList && !trend) return;
-
   // Loading placeholders
   if(leadEl){ leadEl.setAttribute('aria-busy','true'); }
   if(latest){ latest.setAttribute('aria-busy','true'); }
   if(sList){ sList.setAttribute('aria-busy','true'); }
-
   const data=await loadVisibleSorted();
-
   // Empty-content fallback
   if(!data.length){
     if(leadEl){
@@ -389,7 +376,6 @@ async function renderHome(){
     if(trend){ trend.innerHTML = `<span class="muted">No trending tags yet</span>`; }
     return;
   }
-
   if(leadEl){
     leadEl.innerHTML = leadCardHTML(data[0]);
     leadEl.removeAttribute('aria-busy');
@@ -419,12 +405,11 @@ async function renderHome(){
       const date=formatDate(item.meta.Date);
       const url = `article.html?article=${encodeURIComponent(item.file)}`;
       li.innerHTML = `<a href="${escapeAttr(url)}">${escapeHtml(item.meta.Title || item.file)}</a>
-        <div class="muted" style="font-size:.85rem">${escapeHtml(date)}</div>`;
+      <div class="muted" style="font-size:.85rem">${escapeHtml(date)}</div>`;
       sList.appendChild(li);
     }
     sList.removeAttribute('aria-busy');
   }
-
   // Trending tags (top 6)
   if(trend){
     const counts=new Map();
@@ -439,34 +424,27 @@ async function renderHome(){
       ? topTags.map(([k])=>`<a href="newsletters.html?tag=${encodeURIComponent(k)}">${escapeHtml(k)}</a>`).join('')
       : `<span class="muted">No trending tags yet</span>`;
   }
-
   enhanceImages();
   ensureListRoles();
   hookHoverPrefetch();
 }
-
 /* ---------- List page ---------- */
 function parseTagsParam(value){ if(!value) return []; return value.split(',').map(s=>s.trim()).filter(Boolean); }
 async function renderListPage(){
   const container=document.getElementById('news-list');
   if(!container) return;
-
   container.setAttribute('aria-busy','true');
-
   const params=new URLSearchParams(location.search);
   const q=params.get('q')?.trim();
   const activeCat=params.get('category')?.trim();
   const tagParam=params.get('tag')?.trim();
   const activeTags=parseTagsParam(tagParam).map(t=>t.toLowerCase());
-
   const data=await loadVisibleSorted();
-
   const chipWrap=document.getElementById('category-chips');
   if(chipWrap){
     const cats=[...new Set(data.map(i=>(i.meta.Category||'').trim()).filter(Boolean))].sort();
     chipWrap.innerHTML=cats.map(c=>`<a href="newsletters.html?category=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join('');
   }
-
   const tagWrap=document.getElementById('tag-cloud');
   if(tagWrap){
     const counts=new Map();
@@ -488,11 +466,9 @@ async function renderListPage(){
         }).join('')
       : '<span class="muted">No tags yet</span>';
   }
-
   let filtered=activeCat
     ? data.filter(i=>(i.meta.Category||'').trim().toLowerCase()===activeCat.toLowerCase())
     : data;
-
   if(activeTags.length){
     filtered=filtered.filter(i=>{
       const tags=(i.meta._tags||[]).map(t=>t.toLowerCase());
@@ -500,7 +476,6 @@ async function renderListPage(){
     });
   }
   if(q) filtered=searchItems(filtered,q);
-
   const info=document.getElementById('active-filter');
   if(info){
     const parts=[];
@@ -509,7 +484,6 @@ async function renderListPage(){
     if(activeTags.length) parts.push(`Tags: ${escapeHtml(activeTags.join(', '))}`);
     info.textContent = parts.length ? `${filtered.length} result(s) — ${parts.join(' • ')}` : '';
   }
-
   container.innerHTML='';
   if(!filtered.length){
     container.innerHTML=`<p class="muted">No items found${q?` for “${escapeHtml(q)}”`:''}${activeCat?` in ${escapeHtml(activeCat)}`:''}${activeTags.length?` with tags: ${escapeHtml(activeTags.join(', '))}`:''}.</p>`;
@@ -520,12 +494,10 @@ async function renderListPage(){
     container.appendChild(gridCard(item));
   }
   container.removeAttribute('aria-busy');
-
   enhanceImages();
   ensureListRoles();
   hookHoverPrefetch();
 }
-
 /* ---------- OG/Twitter & Canonical helpers ---------- */
 function applyOpenGraph(meta, file){
   // Sane fallbacks
@@ -533,7 +505,6 @@ function applyOpenGraph(meta, file){
   const desc = (meta.Subtitle || '').trim();
   const img = resolveThumbPath(meta.Thumbnail) || DEFAULT_THUMB;
   const url = location.href;
-
   const ogT = document.getElementById('og-title');
   const ogD = document.getElementById('og-description');
   const ogI = document.getElementById('og-image');
@@ -542,21 +513,18 @@ function applyOpenGraph(meta, file){
   if (ogD && !ogD.content && desc) ogD.content = desc;
   if (ogI && (!ogI.content || ogI.content === '')) ogI.content = img;
   if (ogU && (!ogU.content || ogU.content === '')) ogU.content = url;
-
   const twT = document.getElementById('tw-title');
   const twD = document.getElementById('tw-description');
   const twI = document.getElementById('tw-image');
   if (twT && !twT.content) twT.content = title;
   if (twD && !twD.content && desc) twD.content = desc;
   if (twI && (!twI.content || twI.content === '')) twI.content = img;
-
   // Canonical link injection if present
   const canon = document.getElementById('canonical');
   if (canon) {
     try { canon.href = url; } catch {}
   }
 }
-
 /* ---------- Article page ---------- */
 function readingTimeFromText(text,wpm=200){
   const words=String(text??'').trim().split(/\s+/).filter(Boolean).length;
@@ -568,19 +536,16 @@ function populateArticleHero(meta){
   const subEl=document.getElementById('article-subtitle');
   const metaEl=document.getElementById('article-meta');
   const catEl=document.getElementById('article-category');
-
   const title=meta.Title||'Untitled';
   const date=formatDate(meta.Date);
   const author=meta.Author||'Staff';
   const cat=(meta.Category||'').trim();
-
   if(titleEl) titleEl.textContent=title;
   if(subEl) subEl.textContent = meta.Subtitle||'';
   if(metaEl) metaEl.textContent = `${date}${date?' • ':''}${author}`;
   if(catEl){
     if(cat){ catEl.hidden=false; catEl.textContent=cat; } else { catEl.hidden=true; }
   }
-
   const img=resolveThumbPath(meta.Thumbnail);
   if(bg){ bg.src=encodeURI(img); bg.loading='eager'; bg.decoding='async'; bg.alt=''; }
 }
@@ -591,7 +556,6 @@ function buildShareLinks(title){
   const x=document.querySelector('[data-share="x"]');
   const copy=document.querySelector('[data-share="copy"]');
   const fb=document.getElementById('share-feedback');
-
   if(email) email.href=`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
   if(reddit) reddit.href=`https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
   if(x) x.href =`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
@@ -611,11 +575,9 @@ function renderArticle(container, filename, meta, body){
   // Hero, OG & canonical, reading time, tags
   populateArticleHero(meta);
   applyOpenGraph(meta, filename);
-
   const reading=readingTimeFromText(body,200);
   const rt=document.getElementById('article-reading-time');
   if(rt) rt.textContent=` • ${reading}`;
-
   const tags=(meta.Tags?splitTags(meta.Tags):[]);
   const bylineWrap=document.querySelector('.a-hero .a-hero-inner');
   if(tags.length && bylineWrap){
@@ -624,29 +586,24 @@ function renderArticle(container, filename, meta, body){
     tagDiv.innerHTML = tags.map(t=>`<a href="newsletters.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
     bylineWrap.appendChild(tagDiv);
   }
-
   const bodyHtml=renderMarkdownSafe(body);
   const date=formatDate(meta.Date);
   const author=meta.Author||'Staff';
   const metaLine=`${date}${date?' • ':''}${author}`;
-
   container.innerHTML = `
     ${meta.Subtitle?`<p class="muted" style="margin:.2rem 0 1rem 0">${escapeHtml(meta.Subtitle)}</p>`:''}
     <p class="muted" style="margin:.2rem 0 1rem 0">${escapeHtml(metaLine)} • ${escapeHtml(reading)}</p>
     <div>${bodyHtml}</div>
   `;
   container.removeAttribute('aria-busy');
-
   document.title=`${meta.Title||filename} — Sleepy Hallow Media`;
 }
 async function initArticlePage(){
   const content=document.getElementById('article-content');
   if(!content) return;
-
   // Loading on
   content.setAttribute('aria-busy','true');
   content.innerHTML = `<p class="muted">Loading article…</p>`;
-
   const params=new URLSearchParams(window.location.search);
   const raw=params.get('article');
   const file=sanitizeFilename(raw);
@@ -655,7 +612,6 @@ async function initArticlePage(){
     content.removeAttribute('aria-busy');
     return;
   }
-
   const warmKey='pre:'+file;
   const warmed=sessionStorage.getItem(warmKey);
   if(warmed){
@@ -666,7 +622,6 @@ async function initArticlePage(){
       return;
     }catch{}
   }
-
   try{
     const parsed=await loadNewsletter(file);
     renderArticle(content, file, parsed.meta, parsed.body);
@@ -677,7 +632,6 @@ async function initArticlePage(){
     content.removeAttribute('aria-busy');
   }
 }
-
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
   initTheme();
