@@ -1,6 +1,6 @@
-/* Sleepy Hallow Media — Magazine Script (v6.4)
+/* Sleepy Hallow Media — Magazine Script (v6.5)
    Purpose: modernized, bold‑but‑modest cover lead + immersive article polish.
-   Fix: ensure all cards render with proper <a> and <img> tags (no raw URLs).
+   Fix: all cards output proper <a> + <img> elements (no raw URLs as text).
    Keeps: manifest-driven rendering, search, tags, a11y, prefetch, OG/Twitter, image hints.
 */
 'use strict';
@@ -207,7 +207,7 @@ function resolveThumbPath(input){
 }
 function articleUrl(file){ return `article.html?article=${encodeURIComponent(file)}`; }
 
-/* ---------- Card builders (tags fixed) ---------- */
+/* ---------- Card builders (VALID HTML) ---------- */
 function leadCardHTML(item){
   const { file, meta } = item;
   const title = meta.Title || file;
@@ -216,6 +216,7 @@ function leadCardHTML(item){
   const author = meta.Author || 'Staff';
   const img = resolveThumbPath(meta.Thumbnail);
   const url = articleUrl(file);
+
   return `
     ${escapeAttr(url)}</a>
     ${escapeAttr(img)}
@@ -227,6 +228,7 @@ function leadCardHTML(item){
       <span class="cover-sticker" title="Premium Story">No. ${new Date().getFullYear().toString().slice(-2)}</span>
     </div>`;
 }
+
 function topCardHTML(item){
   const { file, meta } = item;
   const title = meta.Title || file;
@@ -234,6 +236,7 @@ function topCardHTML(item){
   const date = formatDate(meta.Date);
   const author = meta.Author || 'Staff';
   const url = articleUrl(file);
+
   return `
     ${escapeAttr(url)}
       ${escapeAttr(img)}
@@ -243,6 +246,7 @@ function topCardHTML(item){
       <div class="top-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
     </div>`;
 }
+
 function gridCard(item){
   const { file, meta } = item;
   const img = resolveThumbPath(meta.Thumbnail);
