@@ -235,7 +235,6 @@ function leadCardHTML(item){
       ${cat ? `<span class="kicker">${escapeHtml(cat)}</span>` : ''}
       <h3 class="lead-title"><a href="${escapeAttr(url)}">${escapeHtml(title)}</a></h3>
       <div class="lead-meta">${escapeHtml(date)}${date ? ' • ' : ''}${escapeHtml(author)}</div>
-      <span class="cover-sticker" title="Premium Story">No. ${new Date().getFullYear().toString().slice(-2)}</span>
     </div>`;
 }
 
