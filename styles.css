@@ -46,7 +46,7 @@
   --wrap:920px;
 
   /* Bars */
-  --topbar-bg:#fff2e0; --topbar-ink:#ff0000; --topbar-line:#f0e0cf;
+  --topbar-bg:#fff2e0; --topbar-ink:#6c3e05; --topbar-line:#f0e0cf;
   --header-bg: color-mix(in oklab, #fff, #f2e7da 18%); --header-line:#eadfd4;
   --trend-bg:#fff4e8; --trend-line:#eddcc9;
   --lead-bg: color-mix(in oklab, #fff, var(--accent) 10%);
@@ -236,7 +236,7 @@ a:focus-visible{ outline:var(--ring); outline-offset:2px; border-radius:6px }
 }
 
 
-.lead-body{ position:relative; color:#fff; padding: clamp(12px, 2.8vw, 22px); z-index:1 }
+.lead-body{ position:relative; color:#ff0000; padding: clamp(12px, 2.8vw, 22px); z-index:1 }
 .lead-body::before{
   content:""; position:absolute; width: clamp(140px, 30vw, 340px); height: clamp(140px, 30vw, 340px);
   left:var(--spot-x, 70%); top:var(--spot-y, 30%); transform: translate(-50%,-50%); pointer-events:none; border-radius:50%;
