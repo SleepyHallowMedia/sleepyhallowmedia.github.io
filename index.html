@@ -1,97 +1,160 @@
 <!doctype html>
 <html lang="en" data-theme="light" data-issue="No. 1" data-season="Autumn, October 2026" data-price="$7.00">
 <head>
-  <!-- One-time ads (keep if needed) -->
+  <!-- Ads (load once per page) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
 
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sleepy Hallow Media — A World of Your Own</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sleepy Hallow Media — Independent Reporting</title>
+  <meta name="description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
 
-  <!-- Canonical & OG (leave generic; script can refine as needed) -->
+  <!-- Canonical & Open Graph -->
   <link rel="canonical" href="https://sleepyhallowmedia.github.io/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sleepy Hallow Media" />
-  <meta property="og:title" content="Sleepy Hallow Media — A World of Your Own" />
-  <meta property="og:description" content="Independent reporting from the Hollow, presented as a surreal folio." />
+  <meta property="og:title" content="Sleepy Hallow Media — Independent Reporting" />
+  <meta property="og:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
   <meta property="og:image" content="assets/social-default.jpg" />
   <meta property="og:url" content="https://sleepyhallowmedia.github.io/" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Sleepy Hallow Media — A World of Your Own" />
-  <meta name="twitter:description" content="Independent reporting from the Hollow, presented as a surreal folio." />
+  <meta name="twitter:title" content="Sleepy Hallow Media — Independent Reporting" />
+  <meta name="twitter:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
   <meta name="twitter:image" content="assets/social-default.jpg" />
 
+  <!-- Icons & Fonts -->
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
 
-  <!-- Base styles (keep your tokens) -->
+  <!-- Styles & App -->
   <link rel="stylesheet" href="styles.css?v=7.2" />
-  <!-- Surreal overlay (new) -->
-  <link rel="stylesheet" href="surreal.css?v=1.0" />
-
-  <!-- Existing libs + your app + bridge -->
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script defer src="script.js?v=6.8"></script>
   <script defer src="effects.js?v=2.0"></script>
-  <script defer src="surreal.js?v=1.0"></script>
 </head>
-<body data-page="folio">
+<body>
+  <!-- Skip link -->
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Folio frame: vertical masthead, stamp, and void -->
-  <main id="main" class="folio" tabindex="-1" aria-label="Sleepy Hallow — Folio">
-    <!-- Left vertical masthead -->
-    <aside class="folio-mast" aria-hidden="true">
-      <span>HALLOW</span>
-    </aside>
+  <div class="topbar" aria-label="Site tools">
+    <div class="wrap topbar-row">
+      <div class="topbar-right">
+      <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+        <label for="q" class="sr-only">Search the site</label>
+        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
+        <button class="btn" type="submit" aria-label="Search">Search</button>
+      </form>
+      </div>
+    </div>
+  </div>
 
-    <!-- Cover stamp (auto-populated via data-* and JS) -->
-    <aside class="folio-stamp" role="note" aria-label="Issue details">
-      <div class="stamp-issue"></div>
-      <div class="stamp-season"></div>
-      <div class="stamp-price"></div>
-      <div class="stamp-barcode" aria-hidden="true"></div>
-    </aside>
-
-    <!-- Cinematic cover -->
-    <section class="cover-scene" aria-label="Cover">
-      <figure class="cover-art">
-        <!-- You can set a default; script will update to lead thumbnail -->
-        <img id="cover-img" src="assets/social-default.jpg" alt="" decoding="async" loading="eager" />
-      </figure>
-      <header class="cover-titles">
-        <h1 class="cover-title">A WORLD OF YOUR OWN</h1>
-        <p class="cover-sub">A magazine for those who venture outside</p>
-      </header>
-
-      <!-- Chapter-size links (the “tabs”, but monumental) -->
-      <nav class="cover-chapters" aria-label="Chapters">
-        <a data-chapter="Night" href="newsletters.html?tag=Night">Life after 10PM</a>
-        <a data-chapter="Reality" href="newsletters.html?tag=Reality">The real world</a>
-        <a data-chapter="Personal" href="newsletters.html?tag=Personal">Personal stories</a>
-        <a data-chapter="Music" href="newsletters.html?tag=Music">Our top songs</a>
-        <a data-chapter="Places" href="newsletters.html?tag=Places">Places to see</a>
-      </nav>
-    </section>
-
-    <!-- Stream: oblique stack of stories (script renders from manifest) -->
-    <section class="oblique-stream" aria-label="Latest from the Hollow">
-      <ol id="stream" class="oblique-list" role="list" aria-busy="true"></ol>
-    </section>
-
-    <!-- Credits / footer minimal -->
-    <footer class="folio-foot" aria-label="Footer">
+  <!-- Header / Primary Nav -->
+  <header class="site-header" role="banner">
+    <div class="wrap header-row">
       <a class="brand" href="index.html">
         <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
-      <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
-    </footer>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a data-nav="home" href="index.html">Home</a>
+        <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
+      </nav>
+      <div class="header-tools">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
+      </div>
+    </div>
+    <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
+      <a data-nav="home" href="index.html">Home</a>
+      <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
+    </nav>
+  </header>
+
+  <!-- Cover-style tabs (inspired by your reference) -->
+  <section class="cover-tabs" aria-label="Cover topics">
+    <div class="wrap">
+      <a href="newsletters.html?tag=Night">Life after 10PM</a>
+      <a href="newsletters.html?tag=Reality">The real world</a>
+      <a href="newsletters.html?tag=Personal">Personal stories</a>
+      <a href="newsletters.html?tag=Music">Our top songs</a>
+      <a href="newsletters.html?tag=Places">Places to see</a>
+    </div>
+  </section>
+
+  <!-- Trending strip -->
+  <section class="trending" aria-label="Trending topics">
+    <div class="wrap trend-row">
+      <div class="trend-label">Trending</div>
+      <div id="trend-topics" class="trend-tags"></div>
+    </div>
+  </section>
+
+  <!-- Front page -->
+  <main id="main" class="wrap front" tabindex="-1">
+    <h2 class="h-section">Latest Stories</h2>
+
+    <!-- Lead + Right rail -->
+    <section class="lead-grid" aria-label="Lead story">
+      <article id="lead-story" class="lead-card" role="article" aria-busy="true"></article>
+      <div class="right-rail" role="list" id="right-rail">
+        <div id="top-stories" class="top-stories"></div>
+      </div>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <!-- Latest + sidebar -->
+    <section class="content-grid" aria-label="Latest and signup">
+      <div id="latest-grid" class="cards-grid" role="list" aria-busy="true"></div>
+      <aside class="side-panel" aria-label="Newsletter signup & recent">
+        <h3 class="h-side">Never miss a premium story</h3>
+        <p>Get the latest in your inbox. No spam.</p>
+        <a class="btn" href="newsletters.html">Subscribe</a>
+        <div class="section-divider" aria-hidden="true"></div>
+        <h3 class="h-side" style="margin-top:8px">Recent</h3>
+        <ul id="sidebar-latest" class="side-list" role="list" aria-busy="true"></ul>
+      </aside>
+    </section>
+
+    <!-- About -->
+    <section id="about-block" class="about-block" aria-labelledby="about-heading">
+      <h2 id="about-heading" class="h-section">About</h2>
+      <p class="about-lede">
+        Sleepy Hallow Media is a small, independent newsroom with a warm point of view —
+        we chase clarity, context, and a bit of wonder.
+      </p>
+      <p class="about-detail">
+        We publish local reporting, politics, culture, and opinion. We keep pages fast,
+        readable, and accessible. We also like a little mischief.
+      </p>
+    </section>
+
+    <!-- Optional handpicked sections -->
+    <section id="dynamic-sections" class="dynamic-sections" aria-label="Handpicked for you"></section>
   </main>
 
+  <!-- Footer -->
+  <footer class="site-footer" id="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <a class="brand" href="index.html">
+          <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
+          <span class="brand-name">Sleepy Hallow Media</span>
+        </a>
+        <p class="muted">Independent reporting from the Hollow.</p>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="newsletters.html">Check Out Our Patreon!</a>
+        <img class="Patreon" src="assets/Patreon.png" alt="Support us on Patreon" width="32" height="16" />
+      </nav>
+      <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
+    </div>
+  </footer>
   <div id="progress-bar" aria-hidden="true"></div>
   <div class="cursor-halo" aria-hidden="true"></div>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
