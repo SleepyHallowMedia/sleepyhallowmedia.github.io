@@ -66,17 +66,6 @@
 <body data-page="article">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="topbar" aria-label="Site tools">
-    <div class="wrap topbar-row">
-      <div class="topbar-right">
-      <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
-        <label for="q" class="sr-only">Search the site</label>
-        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
-        <button class="btn" type="submit" aria-label="Search">Search</button>
-      </form>
-      </div>
-    </div>
-  </div>
 
   <header class="site-header" role="banner">
     <div class="wrap header-row">
@@ -84,7 +73,7 @@
         <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
-      <nav class="primary-nav" aria-label="Primary">
+      <nav class="primary-nav" aria-label="Primary navigation">
         <a data-nav="home" href="index.html">Home</a>
         <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
       </nav>
@@ -93,9 +82,14 @@
           <span class="theme-icon" aria-hidden="true">🌙</span>
         </button>
         <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
+              <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+        <label for="q" class="sr-only">Search the site</label>
+        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
+        <button class="btn" type="submit" aria-label="Search">Search</button>
+      </form>
       </div>
     </div>
-    <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile">
+    <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
       <a data-nav="home" href="index.html">Home</a>
       <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
     </nav>

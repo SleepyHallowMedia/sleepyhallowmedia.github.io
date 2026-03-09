@@ -36,20 +36,7 @@
   <script defer src="effects.js?v=2.0"></script>
 </head>
 <body>
-  <!-- Skip link -->
-  <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="topbar" aria-label="Site tools">
-    <div class="wrap topbar-row">
-      <div class="topbar-right">
-      <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
-        <label for="q" class="sr-only">Search the site</label>
-        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
-        <button class="btn" type="submit" aria-label="Search">Search</button>
-      </form>
-      </div>
-    </div>
-  </div>
 
   <!-- Header / Primary Nav -->
   <header class="site-header" role="banner">
@@ -67,6 +54,11 @@
           <span class="theme-icon" aria-hidden="true">🌙</span>
         </button>
         <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
+              <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+        <label for="q" class="sr-only">Search the site</label>
+        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
+        <button class="btn" type="submit" aria-label="Search">Search</button>
+      </form>
       </div>
     </div>
     <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
