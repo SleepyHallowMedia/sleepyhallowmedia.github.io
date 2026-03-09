@@ -1,8 +1,0 @@
----
-Title: You can't see me
-Author: Johnny Silverhand
-Subtitle:
-Thumbnail: https://img.freepik.com/free-vector/illustration-gallery-icon_53876-27002.jpg?semt=ais_wordcount_boost&w=740&q=80
-Hidden: true
-Date: 2099-01-20
----

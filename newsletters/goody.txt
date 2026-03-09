@@ -1,19 +1,16 @@
 ---
-Title: Image Test
-Subtitle: A Not So short subtitle explainging this article and its thoughts and reasonings
-Author: Jane Good Reporter
-Thumbnail: Untitled.jpg
-Date: 2026-01-23
-Tags: Opinion
+Title: The beginning
+Subtitle: Beginning of this wondeful site.
+Author: Hunter
+Thumbnail: https://images.pexels.com/photos/267151/pexels-photo-267151.jpeg?cs=srgb&dl=pexels-pixabay-267151.jpg&fm=jpg
+Date: 2026-03-08
+Tags: Personal
 ---
 
-This is the first paragraph of the article body. It should appear on article.html.
+Welcome to Sleepy Hallow. I guess?
 
-This is a second paragraph. Separate paragraphs with a blank line.
+This site will be used to more or so highlight topics that may peak me or my friends interests, that is, if they end up *making a post themselves.* Aside from that, I'd like to make my debut speaking of my personal interest in this project.
 
-If you want Markdown, you can add **bold**, *italics*, or lists:
-- Item one
-- Item two
+My friend, in which I will keep unnamed till they decide their time to come along, was the creator of this whole idea, an idea that has many predecessors. An idea in which I have great hopes for, and find great interest in. Not to be so dramatic, but many of these ideas had failed time and time again; this idea however, I have confidence in.
 
-![Alt text](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyaS9dW15PMOAWf9oneAPmq-Fys0W8w3nPXC7wZ36CROlJ3tkNFb0_9uz5CI7h98cHIzOUupljRsENdsXzDLtFfJ-mMB_KHcl7TjZGD8qoXg&s=10)
----
+I'll maybe add more to this specific article as I feel it is very. *unfulfilling*
