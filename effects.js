@@ -12,32 +12,7 @@
   function $(sel, root=doc){ return root.querySelector(sel); }
   function $all(sel, root=doc){ return Array.from(root.querySelectorAll(sel)); }
 
-  /* ---------- Price/Issue sticker ---------- */
-  function injectPriceSticker(){
-    const host = $('#lead-story');
-    if(!host || host.querySelector('.price-sticker')) return;
 
-    const carrier = doc.documentElement.dataset && (doc.documentElement.dataset.price || doc.documentElement.dataset.issue || doc.documentElement.dataset.season)
-      ? doc.documentElement
-      : (doc.body || doc.documentElement);
-
-    const price = carrier.dataset.price || '';
-    const season = carrier.dataset.season || '';
-    const issue = carrier.dataset.issue || '';
-
-    if(!price && !season && !issue) return;
-
-    const el = doc.createElement('div');
-    el.className = 'price-sticker';
-    el.setAttribute('role','note');
-    el.setAttribute('aria-label','Issue information');
-    el.innerHTML = `
-      <div class="ps-line1">${(season || '')}${(season && issue) ? ' • ' : ''}${(issue || '')}</div>
-      ${price ? `<div class="ps-price">${price}</div>` : ''}
-      <div class="ps-barcode" aria-hidden="true"></div>
-    `;
-    host.appendChild(el);
-  }
 
   /* ---------- Lead spotlight pointer ---------- */
   function spotlightLead(){
