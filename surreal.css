@@ -1,0 +1,157 @@
+/* Surreal overlay — v1.0
+   Uses tokens from styles.css; focuses on composition, not colors. */
+
+/* --------- Global adjustments --------- */
+body { background: var(--bg); }
+.folio, .catalogue, .piece { position: relative; min-height: 100dvh; }
+
+/* Massive vertical masthead on left (home) */
+.folio-mast{
+  position: fixed; left: 0; top: 0; bottom: 0; width: clamp(68px, 10vw, 120px);
+  display: grid; place-items: center; z-index: 5;
+  background: color-mix(in oklab, #fff, var(--thumb-bg) 28%);
+  border-right: 1px solid var(--panel-line);
+  box-shadow: var(--shadow-lg);
+}
+.folio-mast span{
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 900 clamp(48px, 9.5vw, 112px) "Playfair Display", Georgia, serif;
+  letter-spacing: .01em; color: color-mix(in oklab, var(--ink), var(--muted) 18%);
+}
+
+/* Issue/price stamp */
+.folio-stamp{
+  position: fixed; right: clamp(10px, 2vw, 20px); top: clamp(10px, 2vw, 16px);
+  z-index: 6; display: grid; gap: 4px; min-width: 128px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--panel-line); border-radius: 10px; padding: 8px 10px;
+  box-shadow: var(--shadow-md); text-align: center; font-weight: 900;
+}
+.folio-stamp .stamp-barcode{
+  height: 18px; border-radius: 3px; margin-top: 4px;
+  background: repeating-linear-gradient(90deg,#111 0 2px,#fff 2px 4px);
+  outline: 1px solid #ddd;
+}
+
+/* Cover scene */
+.cover-scene{
+  margin-left: clamp(68px, 10vw, 120px);
+  padding: clamp(18px, 3vw, 28px) clamp(14px, 3vw, 22px) 0;
+}
+.cover-art{
+  margin: 10px 0;
+  aspect-ratio: 4/3;
+  background: var(--thumb-bg);
+  border: 1px solid var(--panel-line);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.cover-art img{
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(.9) contrast(1.06) brightness(.96);
+}
+.cover-titles{ margin-top: 6px; }
+.cover-title{ font: 900 var(--h1) "Playfair Display", Georgia, serif; margin: .2em 0 .1em; }
+.cover-sub{ margin: 0; color: var(--muted); }
+
+/* Monumental chapters */
+.cover-chapters{
+  display: flex; flex-wrap: wrap; gap: clamp(8px, 1.6vw, 14px); margin: 10px 0 18px;
+}
+.cover-chapters a{
+  display: inline-block; padding: .32rem .7rem; border-radius: 999px;
+  border: 1px solid var(--panel-line); background: var(--surface);
+  font-weight: 900; color: var(--ink); text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+.cover-chapters a:hover{ transform: translateY(-1px); }
+
+/* Oblique stream: tilted rhythm instead of grid */
+.oblique-stream{ margin-left: clamp(68px, 10vw, 120px); padding: 0 clamp(14px, 3vw, 22px) 28px; }
+.oblique-list{ list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(10px, 1.4vw, 16px); }
+.oblique-list li{
+  background: var(--card-bg); border: 1px solid var(--panel-line); border-radius: 14px;
+  box-shadow: var(--shadow-sm); transform: rotate(var(--tilt-angle, -1.25deg));
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+.oblique-list li:nth-child(2n){ --tilt-angle: 1.25deg; }
+.oblique-list li:hover{ box-shadow: var(--shadow-md); transform: rotate(0deg) translateY(-2px); }
+.oblique-item{
+  display: grid; grid-template-columns: minmax(160px, 36%) 1fr; gap: 12px; align-items: center;
+  padding: 12px;
+}
+.oblique-item img{
+  width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; background: var(--thumb-bg);
+}
+.oblique-meta{ color: var(--muted); font-size: .82rem; }
+.oblique-title{ font-weight: 900; margin: 0 0 4px; }
+.oblique-sub{ margin: 0; color: var(--muted); }
+
+/* Footer minimal */
+.folio-foot{
+  margin-left: clamp(68px, 10vw, 120px);
+  padding: 18px clamp(14px,3vw,22px) 28px; border-top: 1px solid var(--panel-line);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+
+/* ---- Catalogue (newsletters) ---- */
+.catalogue{ margin-left: clamp(68px, 10vw, 120px); padding: 18px clamp(14px,3vw,22px) 28px; }
+.catalogue-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.folio-wordmark{ font: 900 clamp(48px, 9vw, 96px) "Playfair Display", Georgia, serif; margin: 0; letter-spacing: .01em; }
+.catalogue-search{ display: flex; gap: .4rem; margin-left: auto; }
+
+.tag-atlas{ margin: 12px 0 18px; }
+.atlas-cloud{ display: flex; flex-wrap: wrap; gap: 8px; }
+.atlas-cloud a{
+  display:inline-block; padding:.26rem .6rem; border-radius:999px; border:1px solid var(--panel-line);
+  background: var(--surface); color: var(--ink); font-weight:900;
+  transform: rotate(var(--tilt, -2deg));
+}
+.atlas-cloud a:nth-child(3n){ --tilt: 1.2deg; }
+
+.timeline-list{ list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+.timeline-list li{
+  border-left: 3px solid color-mix(in oklab, var(--accent), white 35%);
+  padding-left: 12px;
+}
+
+/* ---- Article (piece) ---- */
+.piece{ display: grid; grid-template-columns: clamp(68px, 10vw, 120px) 1fr clamp(220px, 20vw, 280px); gap: 0; }
+.void-rail{
+  position: sticky; top: 0; bottom: 0; height: 100dvh; display: grid; place-items: center;
+  background: color-mix(in oklab, #fff, var(--thumb-bg) 28%); border-right: 1px solid var(--panel-line);
+}
+.void-wordmark{
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 900 clamp(48px, 8.5vw, 104px) "Playfair Display", Georgia, serif;
+  color: color-mix(in oklab, var(--ink), var(--muted) 18%);
+}
+
+.margin-rail{
+  position: sticky; top: 90px; align-self: start; padding: 14px; display: grid; gap: 8px;
+}
+.piece-hero{
+  grid-column: 2 / 3;
+  position: relative; min-height: clamp(220px, 34vw, 360px);
+  border-bottom: 1px solid var(--panel-line); padding: 12px 0 10px;
+}
+.piece-hero-bg{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.96;
+  filter: saturate(.9) contrast(1.06) brightness(.96);
+}
+.piece-head{ position: relative; color: #fff; padding: 16px 0 12px; }
+.piece-body{
+  grid-column: 2 / 3;
+  background: var(--card-bg); border:1px solid var(--panel-line); border-radius: 12px;
+  box-shadow: var(--shadow-sm); padding: clamp(12px,1.6vw,16px); margin: 14px 0 24px;
+}
+
+/* Responsive collapse: hide rails on very small screens */
+@media (max-width: 640px){
+  .folio-mast{ position: static; width: auto; height: auto; writing-mode: horizontal-tb; border-right: none; box-shadow:none; }
+  .folio, .catalogue{ margin-left: 0; }
+  .folio-foot{ margin-left: 0; }
+  .piece{ grid-template-columns: 1fr; }
+  .void-rail, .margin-rail{ display: none; }
+  .piece-hero, .piece-body{ grid-column: 1 / -1; }
+}
