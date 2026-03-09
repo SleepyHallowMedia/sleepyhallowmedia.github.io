@@ -17,15 +17,17 @@
   <script defer src="script.js?v=7.0"></script>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
-
-<div class="topbar" aria-label="Site tools" style="display:flex; justify-content:flex-end;">
-  <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
-    <label for="q" class="sr-only">Search the site</label>
-    <input id="q" name="q" type="search" placeholder="Search…" autocomplete="on" />
-    <button class="btn" type="submit" aria-label="Search">Search</button>
-  </form>
-</div>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="topbar" aria-label="Site tools">
+    <div class="wrap topbar-row">
+      <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+        <label for="q" class="sr-only">Search the site</label>
+        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
+        <button class="btn" type="submit" aria-label="Search">Search</button>
+      </form>
+      </div>
+    </div>
+  </div>
 
   <header class="site-header" role="banner">
     <div class="wrap header-row">
