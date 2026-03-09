@@ -244,11 +244,15 @@ a:focus-visible{ outline:var(--ring); outline-offset:2px; border-radius:6px }
   mix-blend-mode: screen; opacity:.8; transition: opacity .2s ease
 }
 @media (prefers-reduced-motion: reduce){ .lead-body::before{display:none} }
-:root[data-theme="dark"] .kicker{ display:inline-block; padding:.16rem .5rem; border-radius:999px; background:var(--chip-bg); color:var(--chip-ink); font-weight:900; font-size:.6rem; margin-bottom:.4rem }
-.kicker{ display:inline-block; padding:.16rem .5rem; border-radius:999px; background:var(--chip-bg); color:#f0e0cf; var(--chip-ink); font-weight:900; font-size:.6rem; margin-bottom:.4rem }
+
+.kicker{ display:inline-block; padding:.16rem .5rem; border-radius:999px; background:var(--chip-bg); color:#eddcc9; font-weight:900; font-size:.6rem; margin-bottom:.4rem }
 .lead-title, .a-title, h1{ font-family:"Playfair Display", Georgia, serif; font-weight:700; line-height:var(--lh-heading); margin:.1em 0 .35em; font-size:var(--h1)}
 .front .lead-title{ font-size:var(--h0); text-shadow:0 2px 12px rgba(0,0,0,.25) }
 .lead-meta{ opacity:.98; font-weight:800; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35) }
+
+/* Dark Mode for Lead Story Card */
+
+:root[data-theme="dark"] .kicker{ display:inline-block; padding:.16rem .5rem; border-radius:999px; background:var(--chip-bg); color:var(--chip-ink); font-weight:900; font-size:.6rem; margin-bottom:.4rem }
 
 /* price sticker (effects.js injects) */
 .price-sticker{
