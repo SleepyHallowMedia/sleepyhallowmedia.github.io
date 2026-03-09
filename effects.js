@@ -1,5 +1,5 @@
 /* Sleepy Hallow Media — effects.js (v2.0)
- Surreal, tactile interactions layered over script.js. No deps. 
+   Surreal, tactile interactions layered over script.js. No deps.
 */
 (function(){
   'use strict';
@@ -11,6 +11,8 @@
   function idle(fn){ (window.requestIdleCallback || raf)(fn); }
   function $(sel, root=doc){ return root.querySelector(sel); }
   function $all(sel, root=doc){ return Array.from(root.querySelectorAll(sel)); }
+
+
 
   /* ---------- Lead spotlight pointer ---------- */
   function spotlightLead(){
@@ -107,50 +109,4 @@
     idle(progressBar);
     idle(cursorHalo);
   });
-
-  /* ---------- NEW: Price sticker (reads <html data-*> ) ---------- */
-  // Uses existing CSS in styles.css (.price-sticker, .ps-*) to render a compact issue/season/price stamp.
-  function injectPriceSticker(){
-    const root = document.documentElement;
-    const lead = doc.querySelector('.lead-card');
-    if(!lead) return;                         // no lead on this page
-    if(lead.querySelector('.price-sticker')) return; // already injected
-
-    const issue  = (root.dataset.issue  || '').trim();
-    const season = (root.dataset.season || '').trim();
-    const price  = (root.dataset.price  || '').trim();
-    if(!issue && !season && !price) return; // nothing to show
-
-    const box = doc.createElement('aside');
-    box.className = 'price-sticker';
-    box.setAttribute('role','note');
-    box.innerHTML = `
-      <div class="ps-line1">${issue || ''}</div>
-      <div class="ps-line1">${season || ''}</div>
-      <div class="ps-price">${price || ''}</div>
-      <div class="ps-barcode" aria-hidden="true"></div>
-    `;
-    lead.appendChild(box);
-  }
-
-  /* ---------- NEW: Image polish used by script.js ---------- */
-  // script.js calls enhanceImages() after rendering home/list/article; provide it.
-  // Adds a gentle tone and frames inline article images (but respects full-bleed).
-  window.enhanceImages = function enhanceImages(root = document){
-    // Tone thumbnails & hero gently
-    root.querySelectorAll('.card-img, .top-thumb, .a-hero-bg').forEach(img=>{
-      img.classList.add('nocturne');
-    });
-
-    // Wrap stand-alone images in article body for a subtle frame
-    root.querySelectorAll('.article-body img:not([data-enhanced])').forEach(img=>{
-      img.setAttribute('data-enhanced','1');
-      if(img.closest('.a-hero')) return;            // skip hero
-      if(img.closest('.figure-bleed')) return;      // keep your full-bleed pattern
-      const fig = doc.createElement('figure');
-      fig.className = 'figure-framed';
-      img.replaceWith(fig);
-      fig.appendChild(img);
-    });
-  };
 })();
