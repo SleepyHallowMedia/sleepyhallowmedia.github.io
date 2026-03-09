@@ -1,8 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light"
-      data-issue="No. 1"
-      data-season="Autumn, October 2026"
-      data-price="$7.00">
+<html lang="en" data-theme="light" data-issue="No. 1" data-season="Autumn, October 2026" data-price="$7.00">
 <head>
   <!-- Ads (load once per page) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
@@ -32,11 +29,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
 
   <!-- Styles & App -->
-  <link rel="stylesheet" href="styles.css?v=7.5" />
+  <link rel="stylesheet" href="styles.css?v=7.2" />
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script defer src="script.js?v=6.8"></script>
-  <script defer src="effects.js?v=1.2"></script>
+  <script defer src="effects.js?v=2.0"></script>
 </head>
 <body>
   <!-- Skip link -->
@@ -82,7 +79,7 @@
     </nav>
   </header>
 
-  <!-- Cover-style tabs -->
+  <!-- Cover-style tabs (inspired by your reference) -->
   <section class="cover-tabs" aria-label="Cover topics">
     <div class="wrap">
       <a href="newsletters.html?tag=Night">Life after 10PM</a>
@@ -141,6 +138,7 @@
       </p>
     </section>
 
+    <!-- Optional handpicked sections -->
     <section id="dynamic-sections" class="dynamic-sections" aria-label="Handpicked for you"></section>
   </main>
 
@@ -161,6 +159,8 @@
       <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
     </div>
   </footer>
+  <div id="progress-bar" aria-hidden="true"></div>
+  <div class="cursor-halo" aria-hidden="true"></div>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

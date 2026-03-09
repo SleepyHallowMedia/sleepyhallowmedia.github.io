@@ -1,139 +1,137 @@
-/* Sleepy Hallow Media — effects.js (v1.2)
-   Adds surreal/interactive touches without altering script.js:
-   - Inject price/issue sticker on the home lead (from <html data-*>).
-   - Spotlight hover over the lead headline area.
-   - Reveal-on-scroll for cards/right-rail.
-   - Article scroll "barcode" progress.
+/* Sleepy Hallow Media — effects.js (v2.0)
+   Surreal, tactile interactions layered over script.js. No deps.
 */
 (function(){
   'use strict';
-
   const doc = document;
   const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const $$ = (sel, root = doc) => Array.from(root.querySelectorAll(sel));
-  const $ = (sel, root = doc) => root.querySelector(sel);
+  /* ---------- Utilities ---------- */
+  function raf(fn){ return requestAnimationFrame(fn); }
+  function idle(fn){ (window.requestIdleCallback || raf)(fn); }
+  function $(sel, root=doc){ return root.querySelector(sel); }
+  function $all(sel, root=doc){ return Array.from(root.querySelectorAll(sel)); }
 
-  function idle(fn){ (window.requestIdleCallback || window.requestAnimationFrame)(fn); }
-
-  /* ---------- Lead: price/issue sticker ---------- */
+  /* ---------- Price/Issue sticker ---------- */
   function injectPriceSticker(){
     const host = $('#lead-story');
     if(!host || host.querySelector('.price-sticker')) return;
 
-    const carrier = document.documentElement;
-    const price  = carrier.dataset.price  || '';
+    const carrier = doc.documentElement.dataset && (doc.documentElement.dataset.price || doc.documentElement.dataset.issue || doc.documentElement.dataset.season)
+      ? doc.documentElement
+      : (doc.body || doc.documentElement);
+
+    const price = carrier.dataset.price || '';
     const season = carrier.dataset.season || '';
-    const issue  = carrier.dataset.issue  || '';
+    const issue = carrier.dataset.issue || '';
 
     if(!price && !season && !issue) return;
 
     const el = doc.createElement('div');
     el.className = 'price-sticker';
-    el.setAttribute('role', 'note');
-    el.setAttribute('aria-label', 'Issue information');
+    el.setAttribute('role','note');
+    el.setAttribute('aria-label','Issue information');
     el.innerHTML = `
-      <div class="ps-line1">${[season, issue].filter(Boolean).join(' • ')}</div>
+      <div class="ps-line1">${(season || '')}${(season && issue) ? ' • ' : ''}${(issue || '')}</div>
       ${price ? `<div class="ps-price">${price}</div>` : ''}
       <div class="ps-barcode" aria-hidden="true"></div>
     `;
     host.appendChild(el);
   }
 
-  /* ---------- Lead: spotlight hover ---------- */
+  /* ---------- Lead spotlight pointer ---------- */
   function spotlightLead(){
-    if(prefersReduced) return;
-    const leadBody = $('.lead-card .lead-body');
-    if(!leadBody) return;
-
-    let raf = 0, x = 0, y = 0;
-    const apply = () => {
-      raf = 0;
-      leadBody.style.setProperty('--spot-x', x + 'px');
-      leadBody.style.setProperty('--spot-y', y + 'px');
-    };
-    const onMove = (e) => {
-      const r = leadBody.getBoundingClientRect();
+    const layer = $('.lead-card .lead-body');
+    if(!layer || prefersReduced) return;
+    let ticking = false, x=0, y=0;
+    function apply(){ ticking=false; layer.style.setProperty('--spot-x', x+'px'); layer.style.setProperty('--spot-y', y+'px'); }
+    layer.addEventListener('mousemove', (e)=>{
+      const r = layer.getBoundingClientRect();
       x = Math.max(0, Math.min(e.clientX - r.left, r.width));
       y = Math.max(0, Math.min(e.clientY - r.top, r.height));
-      if(!raf) raf = requestAnimationFrame(apply);
-    };
-    leadBody.addEventListener('mousemove', onMove, {passive:true});
-    leadBody.addEventListener('mouseleave', () => {
-      leadBody.style.removeProperty('--spot-x');
-      leadBody.style.removeProperty('--spot-y');
+      if(!ticking) { ticking=true; raf(apply); }
+    }, {passive:true});
+    layer.addEventListener('mouseleave', ()=>{
+      layer.style.removeProperty('--spot-x');
+      layer.style.removeProperty('--spot-y');
     }, {passive:true});
   }
 
-  /* ---------- Reveal-on-scroll ---------- */
+  /* ---------- Reveal on scroll ---------- */
   function revealOnScroll(){
-    const targets = $$('.cards-grid .card, .top-card');
-    if(!targets.length) return;
-    targets.forEach(t => t.classList.add('reveal'));
-    const io = new IntersectionObserver((entries) => {
+    const items = $all('.cards-grid .card, .top-card');
+    if(!items.length) return;
+    items.forEach(n=>n.classList.add('reveal'));
+    const io = new IntersectionObserver((entries)=>{
       for(const it of entries){
         if(it.isIntersecting){
           it.target.classList.add('is-revealed');
           io.unobserve(it.target);
         }
       }
-    }, {rootMargin: '100px 0px'});
-    targets.forEach(t => io.observe(t));
+    }, {rootMargin:'80px 0px'});
+    items.forEach(n=>io.observe(n));
   }
 
-  /* ---------- Article: scroll barcode progress ---------- */
-  function articleBarcode(){
-    const wrap = $('.article-wrap');
-    if(!wrap) return;
-
-    // mount if not present
-    let bar = $('.scroll-barcode');
+  /* ---------- Scroll progress bar ---------- */
+  function progressBar(){
+    if(prefersReduced) return;
+    let bar = $('#progress-bar');
     if(!bar){
       bar = doc.createElement('div');
-      bar.className = 'scroll-barcode';
-      wrap.prepend(bar);
+      bar.id = 'progress-bar';
+      doc.body.appendChild(bar);
     }
-
-    const update = () => {
-      const el = $('.article-body');
-      if(!el) return;
-      const r = el.getBoundingClientRect();
-      const total = el.scrollHeight - window.innerHeight;
-      const sc = Math.min(Math.max(window.scrollY - (el.offsetTop - 64), 0), total);
-      const pct = total > 0 ? (sc/total)*100 : 0;
-      bar.style.setProperty('--progress', pct.toFixed(2) + '%');
-    };
+    function update(){
+      const h = doc.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max)*100 : 0;
+      bar.style.width = pct.toFixed(2)+'%';
+    }
     update();
-    window.addEventListener('scroll', update, {passive:true});
-    window.addEventListener('resize', update, {passive:true});
+    doc.addEventListener('scroll', ()=>raf(update), {passive:true});
   }
 
-  /* ---------- bootstrap after content exists ---------- */
-  function enhanceHome(){
-    const lead = $('#lead-story');
-    if(!lead) return;
-    if(lead.children.length){
+  /* ---------- Cursor halo ---------- */
+  function cursorHalo(){
+    if(prefersReduced) return;
+    let halo = $('.cursor-halo');
+    if(!halo){
+      halo = doc.createElement('div');
+      halo.className = 'cursor-halo';
+      doc.body.appendChild(halo);
+    }
+    let active = false, ticking = false, x=0, y=0;
+    function place(){ ticking=false; halo.style.left=x+'px'; halo.style.top=y+'px'; }
+    doc.addEventListener('mousemove', (e)=>{
+      x=e.clientX; y=e.clientY;
+      if(!active){ active=true; halo.classList.add('on'); }
+      if(!ticking){ ticking=true; raf(place); }
+    }, {passive:true});
+    doc.addEventListener('mouseleave', ()=>{ active=false; halo.classList.remove('on'); }, {passive:true});
+  }
+
+  /* ---------- Boot (after script.js populates) ---------- */
+  function initHome(){
+    const host = $('#lead-story');
+    if(!host) return; // not the home page
+    if(host.children.length){
       injectPriceSticker(); spotlightLead(); revealOnScroll();
       return;
     }
-    // wait for script.js to populate
-    const mo = new MutationObserver(() => {
-      if(lead.children.length){
+    const mo = new MutationObserver(()=>{
+      if(host.children.length){
         mo.disconnect();
         injectPriceSticker(); spotlightLead(); revealOnScroll();
       }
     });
-    mo.observe(lead, {childList:true, subtree:false});
-    setTimeout(()=>{ try{ mo.disconnect(); }catch{} }, 3500);
+    mo.observe(host, {childList:true});
+    setTimeout(()=>{ try{mo.disconnect()}catch{} }, 4000);
   }
 
-  function enhanceArticle(){
-    // if article page, mount barcode after DOM ready
-    if($('.article-wrap')) articleBarcode();
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    idle(enhanceHome);
-    idle(enhanceArticle);
+  doc.addEventListener('DOMContentLoaded', ()=>{
+    idle(initHome);
+    idle(progressBar);
+    idle(cursorHalo);
   });
 })();

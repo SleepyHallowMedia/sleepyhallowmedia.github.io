@@ -1,17 +1,21 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-issue="No. 1" data-season="Autumn, October 2026" data-price="$7.00">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sleepy Hallow Media — Article</title>
+
   <!-- Canonical filled at runtime -->
   <link id="canonical" rel="canonical" href="">
+
   <!-- Icons & Fonts -->
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=6.2" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css?v=7.2" />
+
   <!-- OG/Twitter defaults (script overwrites) -->
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Sleepy Hallow Media" />
@@ -23,12 +27,41 @@
   <meta name="twitter:title" id="tw-title" content="Sleepy Hallow Media — Article" />
   <meta name="twitter:description" id="tw-description" content="" />
   <meta name="twitter:image" id="tw-image" content="assets/social-default.jpg" />
+
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script defer src="script.js?v=6.2"></script>
+  <script defer src="script.js?v=6.8"></script>
+  <script defer src="effects.js?v=2.0"></script>
+
   <!-- AdSense loader (once) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
-  <!-- Fixed ad rails alignment helper is in styles.css (root vars) -->
+
+  <!-- Alignment helper from your original -->
+  <style>
+    :root{ --article-content-width:740px; --rail-width:120px; --rail-gap:24px; --rails-top:120px; --rails-min-viewport:1280px; --z-rails:10; }
+    .ad-rail-fixed{ position:fixed; top:var(--rails-top); width:var(--rail-width); z-index:var(--z-rails); display:none; }
+    @media (min-width: var(--rails-min-viewport)){
+      .ad-rail-fixed{ display:block; }
+      .ad-rail-left{ left: calc(50% - (var(--article-content-width) / 2) - var(--rail-gap) - var(--rail-width)); }
+      .ad-rail-right{ left: calc(50% + (var(--article-content-width) / 2) + var(--rail-gap)); }
+    }
+    .article-body { max-width: 740px; margin: 0 auto; width: 100%; }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const el = document.querySelector('.article-body');
+      if (!el) return;
+      const setW = () => {
+        const w = Math.round(el.getBoundingClientRect().width);
+        if (w > 0) document.documentElement.style.setProperty('--article-content-width', w + 'px');
+      };
+      setW(); let rafId = null;
+      window.addEventListener('resize', () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(setW);
+      });
+    });
+  </script>
 </head>
 <body data-page="article">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -71,6 +104,17 @@
     </nav>
   </header>
 
+  <!-- Optional cover tabs for continuity -->
+  <section class="cover-tabs" aria-label="Cover topics">
+    <div class="wrap">
+      <a href="newsletters.html?tag=Night">Life after 10PM</a>
+      <a href="newsletters.html?tag=Reality">The real world</a>
+      <a href="newsletters.html?tag=Personal">Personal stories</a>
+      <a href="newsletters.html?tag=Music">Our top songs</a>
+      <a href="newsletters.html?tag=Places">Places to see</a>
+    </div>
+  </section>
+
   <!-- Article hero -->
   <section id="article-hero" class="a-hero" aria-label="Article header">
     <img class="a-hero-bg" alt="" loading="eager" decoding="async" width="1280" height="720" />
@@ -103,7 +147,7 @@
       <p class="muted">Loading article…</p>
     </article>
 
-    <!-- Sticky share (desktop) / inline (mobile) -->
+    <!-- Sticky share / inline -->
     <aside class="share-bar" aria-label="Share this article">
       <button class="share-btn" data-share="copy" aria-label="Copy link to clipboard">Copy Link</button>
       <a class="share-btn" data-share="email" target="_blank" rel="noopener" aria-label="Share via email">Email</a>
@@ -129,6 +173,8 @@
       <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
     </div>
   </footer>
+  <div id="progress-bar" aria-hidden="true"></div>
+  <div class="cursor-halo" aria-hidden="true"></div>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

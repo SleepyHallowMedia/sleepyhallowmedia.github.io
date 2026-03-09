@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-issue="No. 1" data-season="Autumn, October 2026" data-price="$7.00">
 <head>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9198552366209337" crossorigin="anonymous"></script>
   <meta charset="utf-8" />
@@ -7,6 +7,7 @@
   <title>Sleepy Hallow Media — All Newsletters</title>
   <meta name="description" content="Browse all Sleepy Hallow Media stories by category and tag." />
   <link rel="canonical" href="https://sleepyhallowmedia.github.io/newsletters.html" />
+
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sleepy Hallow Media" />
   <meta property="og:title" content="Sleepy Hallow Media — Newsletters" />
@@ -17,15 +18,17 @@
   <meta name="twitter:title" content="Sleepy Hallow Media — Newsletters" />
   <meta name="twitter:description" content="Browse all issues and stories." />
   <meta name="twitter:image" content="assets/social-default.jpg" />
+
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=7.5" />
+
+  <link rel="stylesheet" href="styles.css?v=7.2" />
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script defer src="script.js?v=6.8"></script>
-  <script defer src="effects.js?v=1.2"></script>
+  <script defer src="effects.js?v=2.0"></script>
 </head>
 <body data-page="list">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -68,7 +71,7 @@
     </nav>
   </header>
 
-  <!-- Cover tabs for continuity -->
+  <!-- Cover tabs -->
   <section class="cover-tabs" aria-label="Cover topics">
     <div class="wrap">
       <a href="newsletters.html?tag=Night">Life after 10PM</a>
@@ -81,6 +84,7 @@
 
   <main class="wrap list-page" id="main" tabindex="-1">
     <h1 class="page-title">All Newsletters</h1>
+
     <div class="filter-row" role="region" aria-label="Filters">
       <div id="active-filter" class="muted" role="status" aria-live="polite"></div>
       <div class="muted" style="margin-top:.6rem">Categories</div>
@@ -88,6 +92,7 @@
       <div class="muted" style="margin-top:.6rem">Tags</div>
       <div id="tag-cloud" class="trend-tags" style="margin-top:.2rem;"></div>
     </div>
+
     <div id="news-list" class="cards-grid" role="list" aria-busy="true"></div>
   </main>
 
@@ -107,7 +112,8 @@
       <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
     </div>
   </footer>
+  <div id="progress-bar" aria-hidden="true"></div>
+  <div class="cursor-halo" aria-hidden="true"></div>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
-``
