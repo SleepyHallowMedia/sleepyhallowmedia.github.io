@@ -1,3 +1,3 @@
 # Sleepy Hallow Media
 
-Simply a way to source newsletters in a free open source manner.
+Simply a way to provide newsletters in a free open source manner.
