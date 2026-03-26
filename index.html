@@ -9,14 +9,18 @@
   <title>Sleepy Hallow Media — Independent Reporting</title>
   <meta name="description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
 
-  <!-- Canonical & Open Graph -->
+  <!-- Canonical (static; script.js handles article pages only) -->
   <link rel="canonical" href="https://sleepyhallowmedia.github.io/" />
+
+  <!-- OpenGraph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sleepy Hallow Media" />
   <meta property="og:title" content="Sleepy Hallow Media — Independent Reporting" />
   <meta property="og:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
   <meta property="og:image" content="assets/social-default.jpg" />
   <meta property="og:url" content="https://sleepyhallowmedia.github.io/" />
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Sleepy Hallow Media — Independent Reporting" />
   <meta name="twitter:description" content="Warm, independent reporting with a whimsical twist — local, politics, culture, opinion, and more." />
@@ -24,19 +28,23 @@
 
   <!-- Icons & Fonts -->
   <link rel="icon" href="favicon.ico" sizes="any" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com"play=swap" rel="stylesheet">
 
-  <!-- Styles & App -->
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css?v=7.2" />
+
+  <!-- Markdown Rendering -->
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script defer src="script.js?v=6.8"></script>
-  <script defer src="effects.js?v=2.0"></script>
-</head>
-<body>
 
+  <!-- Site Scripts -->
+  <script defer src="script.js?v=1.0"></script>
+  <script defer src="effects.js?v=1.0"></script>
+</head>
+
+<body>
+  <!-- Skip link for accessibility -->
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Header / Primary Nav -->
   <header class="site-header" role="banner">
@@ -45,29 +53,26 @@
         <img class="brand-mark" src="assets/logo.png" alt="Sleepy Hallow Media logo" width="28" height="28" />
         <span class="brand-name">Sleepy Hallow Media</span>
       </a>
+
       <nav class="primary-nav" aria-label="Primary navigation">
-        <a data-nav="home" href="index.html">Home</a>
-        <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
-      </nav>
-      <div class="header-tools">
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
-          <span class="theme-icon" aria-hidden="true">🌙</span>
-        </button>
-        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
-              <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
-        <label for="q" class="sr-only">Search the site</label>
-        <input id="q" name="q" type="search" placeholder="Search…" autocomplete="off" />
-        <button class="btn" type="submit" aria-label="Search">Search</button>
-      </form>
+        <a data-nav="home" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
+
+        <!-- ID corrected: no more duplicate #q across pages -->
+        <form id="site-search" class="top-search" action="newsletters.html" method="get" role="search">
+          <label for="search-home" class="sr-only">Search the site</label>
+          <input id="search-home" name="q" type="search" placeholder="Search…" autocomplete="off" />
+          <button class="btn" type="submit" aria-label="Search">Search</button>
+        </form>
       </div>
     </div>
+
     <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
       <a data-nav="home" href="index.html">Home</a>
       <a data-nav="newsletters" href="newsletters.html">Newsletters</a>
     </nav>
   </header>
 
-  <!-- Cover-style tabs (inspired by your reference) -->
+  <!-- Cover-style tabs -->
   <section class="cover-tabs" aria-label="Cover topics">
     <div class="wrap">
       <a href="newsletters.html?tag=Night">Life after 10PM</a>
@@ -88,11 +93,12 @@
 
   <!-- Front page -->
   <main id="main" class="wrap front" tabindex="-1">
-    <h2 class="h-section">Latest Stories</h2>
+    <h1 class="h-section">Latest Stories</h1>
 
     <!-- Lead + Right rail -->
     <section class="lead-grid" aria-label="Lead story">
       <article id="lead-story" class="lead-card" role="article" aria-busy="true"></article>
+
       <div class="right-rail" role="list" id="right-rail">
         <div id="top-stories" class="top-stories"></div>
       </div>
@@ -103,12 +109,14 @@
     <!-- Latest + sidebar -->
     <section class="content-grid" aria-label="Latest and signup">
       <div id="latest-grid" class="cards-grid" role="list" aria-busy="true"></div>
+
       <aside class="side-panel" aria-label="Newsletter signup & recent">
-        <h3 class="h-side">Never miss a exclusive story</h3>
+        <h3 class="h-side">Never miss an exclusive story</h3>
         <p>Get the latest in your inbox. No spam.</p>
         <a class="btn" href="https://www.patreon.com/cw/SleepyHallowMedia">Subscribe</a>
+
         <div class="section-divider" aria-hidden="true"></div>
-        
+
         <ul id="sidebar-latest" class="side-list" role="list" aria-busy="true"></ul>
       </aside>
     </section>
@@ -126,7 +134,7 @@
       </p>
     </section>
 
-    <!-- Optional handpicked sections -->
+    <!-- Optional dynamic sections -->
     <section id="dynamic-sections" class="dynamic-sections" aria-label="Handpicked for you"></section>
   </main>
 
@@ -140,16 +148,22 @@
         </a>
         <p class="muted">Independent reporting from the Hollow.</p>
       </div>
+
       <nav class="footer-links" aria-label="Footer">
         <a href="https://www.patreon.com/cw/SleepyHallowMedia">Check Out Our Patreon!</a>
         <a>or</a>
         <a href="https://github.com/SleepyHallowMedia/sleepyhallowmedia.github.io">Our GitHub Repo!</a>
       </nav>
+
       <div class="copy muted">© <span id="year"></span> Sleepy Hallow Media</div>
     </div>
   </footer>
+
   <div id="progress-bar" aria-hidden="true"></div>
   <div class="cursor-halo" aria-hidden="true"></div>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
